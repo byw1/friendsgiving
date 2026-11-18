@@ -56,7 +56,7 @@ export const SEED_ITEMS: SeedItem[] = [
   { slug: "pie", category: "dessert", label: "Pie", hint: "pumpkin, apple, pecan", need: 2 },
   { slug: "sweets", category: "dessert", label: "Something sweet", hint: "cookies, brownies", need: 1 },
 
-  { slug: "alcohol", category: "drinks", label: "Alcohol", hint: "wine, beer, a bottle", need: 4,
+  { slug: "alcohol", category: "drinks", label: "Alcohol", hint: "wine, beer, a bottle", need: 6,
     options: ["Wine", "Beer", "Seltzers", "Tequila", "Vodka", "Whiskey", "Rum", "Soju"] },
   { slug: "chasers", category: "drinks", label: "Chasers & mixers", need: 2,
     options: ["Coke", "Sprite", "Ginger beer", "Tonic", "Club soda", "Cranberry juice", "OJ", "Lime juice"] },
