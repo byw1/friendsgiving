@@ -16,7 +16,6 @@ import {
   Martini,
   Plus,
   Salad,
-  Snowflake,
   Soup,
   Sparkles,
   Utensils,
@@ -27,7 +26,7 @@ import {
 import { CATEGORIES } from "@/lib/event";
 import type { Claim, Item } from "@/lib/types";
 import { useApp } from "./App";
-import { Avatar, Btn, Heading, TextInput, bouncy, firstName, useToast } from "./ui";
+import { Avatar, Btn, Heading, Sheet, TextInput, bouncy, firstName, useToast } from "./ui";
 
 const ICONS: Record<string, [LucideIcon, string]> = {
   turkey: [Drumstick, "#ff9600"],
@@ -43,7 +42,6 @@ const ICONS: Record<string, [LucideIcon, string]> = {
   alcohol: [Wine, "#ce82ff"],
   chasers: [Martini, "#1cb0f6"],
   soft: [CupSoda, "#ff4b4b"],
-  ice: [Snowflake, "#1cb0f6"],
   cups: [GlassWater, "#1cb0f6"],
   plates: [Utensils, "#777777"],
   utensils: [Utensils, "#afafaf"],
@@ -145,6 +143,7 @@ function ItemTile({ item }: { item: Item }) {
   const { me, api, asSomeone, editGuest, celebrate } = useApp();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [picking, setPicking] = useState(false);
   const [Icon, color] = ICONS[item.slug ?? ""] ?? fallbackIcon;
   const mine = me ? item.claims.find((c) => c.guestId === me.id) : undefined;
   const full = item.claims.length >= item.need;
@@ -158,15 +157,21 @@ function ItemTile({ item }: { item: Item }) {
       if (r.state) toast(`Took ${item.label.toLowerCase()} off your list`, "info");
       return;
     }
+    if (item.options?.length) setPicking(true);
+    else claim(null);
+  };
+
+  const claim = (note: string | null) => {
+    setPicking(false);
     asSomeone({
       title: "What's your name?",
       run: async (guestId) => {
         setBusy(true);
-        const r = await api("/api/claims", { body: { guestId, itemId: item.id } });
+        const r = await api("/api/claims", { body: { guestId, itemId: item.id, note } });
         setBusy(false);
         if (r.state) {
           celebrate("happy");
-          toast(`Nice! You're on ${item.label.toLowerCase()}.`);
+          toast(`Nice! You're on ${(note ?? item.label).toLowerCase()}.`);
         }
       },
     });
@@ -214,7 +219,10 @@ function ItemTile({ item }: { item: Item }) {
               ))}
             </div>
             <p className="truncate text-[13px] font-bold text-mute">
-              {item.claims.map((c) => firstName(c.guestName)).slice(0, 2).join(" & ")}
+              {item.claims
+                .map((c) => (c.note ? `${firstName(c.guestName)} · ${c.note}` : firstName(c.guestName)))
+                .slice(0, 2)
+                .join(item.options ? ", " : " & ")}
               {item.claims.length > 2 && ` +${item.claims.length - 2}`}
               {item.need > 1 && <span className="text-faint"> · {Math.min(item.claims.length, item.need)}/{item.need}</span>}
             </p>
@@ -238,7 +246,51 @@ function ItemTile({ item }: { item: Item }) {
           </motion.span>
         </AnimatePresence>
       </motion.button>
+      {item.options && <OptionPicker item={item} open={picking} onClose={() => setPicking(false)} onPick={claim} />}
     </motion.div>
+  );
+}
+
+/** "Which one?" for drinks. Tap a chip, type your own, or skip. */
+function OptionPicker({ item, open, onClose, onPick }: { item: Item; open: boolean; onClose: () => void; onPick: (note: string | null) => void }) {
+  const [other, setOther] = useState("");
+  const taken = new Set(item.claims.map((c) => c.note?.toLowerCase()).filter(Boolean));
+  return (
+    <Sheet open={open} onClose={onClose} title={`What ${item.label.toLowerCase()} are you bringing?`}>
+      <div className="flex flex-wrap gap-2">
+        {item.options!.map((o, i) => (
+          <motion.button
+            key={o}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ ...bouncy, delay: Math.min(i * 0.025, 0.3) }}
+            onClick={() => onPick(o)}
+            className="ledge-sm rounded-2xl border-2 border-line bg-paper px-4 py-2.5 text-[15px] font-extrabold text-ink hover:bg-snow"
+          >
+            {o}
+            {taken.has(o.toLowerCase()) && <span className="ml-1.5 text-[12px] font-bold text-faint">someone has it</span>}
+          </motion.button>
+        ))}
+      </div>
+      <form
+        className="mt-5 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (other.trim()) {
+            onPick(other.trim());
+            setOther("");
+          }
+        }}
+      >
+        <TextInput id={`opt-${item.id}`} value={other} maxLength={40} onChange={(e) => setOther(e.target.value)} placeholder="Something else…" />
+        <Btn tone="pumpkin" disabled={!other.trim()} className="shrink-0 !px-4" aria-label="Add">
+          <Plus className="size-5" strokeWidth={3.5} />
+        </Btn>
+      </form>
+      <button onClick={() => onPick(null)} className="mt-4 w-full py-2 text-[14px] font-extrabold text-mute hover:text-ink">
+        Not sure yet, decide later
+      </button>
+    </Sheet>
   );
 }
 

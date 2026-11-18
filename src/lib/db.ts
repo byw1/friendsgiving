@@ -84,12 +84,13 @@ async function seed(client: PoolClient) {
       [item.slug, item.category, item.label, item.hint ?? null, item.need, sort]
     );
   }
-  // Items removed from the config disappear unless someone already claimed them.
+  // Items removed from the config disappear. Anyone who already claimed one keeps it as a free-text extra.
   await client.query(
-    `delete from items i where i.slug is not null and not (i.slug = any($1))
-       and not exists (select 1 from claims c where c.item_id = i.id)`,
+    `update claims c set label = i.label, item_id = null from items i
+      where c.item_id = i.id and i.slug is not null and not (i.slug = any($1))`,
     [slugs]
   );
+  await client.query(`delete from items i where i.slug is not null and not (i.slug = any($1))`, [slugs]);
 }
 
 export async function db(): Promise<Pool> {

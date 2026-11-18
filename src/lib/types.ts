@@ -16,6 +16,7 @@ export type Item = {
   label: string;
   hint: string | null;
   need: number;
+  options?: string[];
   claims: Claim[];
 };
 

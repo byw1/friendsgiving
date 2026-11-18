@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { SEED_ITEMS } from "./event";
 import type { Claim, Guest, Item, State } from "./types";
 
 export async function getState(): Promise<State> {
@@ -27,6 +28,7 @@ export async function getState(): Promise<State> {
     label: r.label,
     hint: r.hint,
     need: r.need,
+    options: SEED_ITEMS.find((s) => s.slug === r.slug)?.options,
     claims: live.filter((c) => c.itemId === r.id),
   }));
 

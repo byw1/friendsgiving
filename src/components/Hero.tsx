@@ -71,7 +71,7 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
           {EVENT.timeLabel}
         </Chip>
         <Chip icon={<MapPin className="size-4" strokeWidth={2.75} />} tone="bg-leaf-soft text-leaf-dark">
-          {EVENT.placeDetail}
+          {EVENT.place}
         </Chip>
       </motion.div>
 

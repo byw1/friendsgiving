@@ -8,7 +8,6 @@ export const EVENT = {
   dateLabel: "Saturday, November 21",
   timeLabel: "6:00 PM",
   place: "The Penthouse",
-  placeDetail: "William's office",
   partifulUrl: process.env.PARTIFUL_URL || "",
 };
 
@@ -30,6 +29,8 @@ export type SeedItem = {
   label: string;
   hint?: string;
   need: number;
+  // Shows a "which one?" picker when someone grabs it.
+  options?: string[];
 };
 
 export const CATEGORIES = [
@@ -54,10 +55,12 @@ export const SEED_ITEMS: SeedItem[] = [
   { slug: "pie", category: "dessert", label: "Pie", hint: "pumpkin, apple, pecan", need: 2 },
   { slug: "sweets", category: "dessert", label: "Something sweet", hint: "cookies, brownies", need: 1 },
 
-  { slug: "alcohol", category: "drinks", label: "Alcohol", hint: "wine, beer, a bottle", need: 4 },
-  { slug: "chasers", category: "drinks", label: "Chasers & mixers", need: 2 },
-  { slug: "soft", category: "drinks", label: "Soda & sparkling water", need: 1 },
-  { slug: "ice", category: "drinks", label: "Ice", need: 1 },
+  { slug: "alcohol", category: "drinks", label: "Alcohol", hint: "wine, beer, a bottle", need: 4,
+    options: ["Wine", "Beer", "Seltzers", "Tequila", "Vodka", "Whiskey", "Rum", "Soju"] },
+  { slug: "chasers", category: "drinks", label: "Chasers & mixers", need: 2,
+    options: ["Coke", "Sprite", "Ginger beer", "Tonic", "Club soda", "Cranberry juice", "OJ", "Lime juice"] },
+  { slug: "soft", category: "drinks", label: "Soda & sparkling water", need: 1,
+    options: ["Coke", "Diet Coke", "Sprite", "Ginger ale", "LaCroix", "Topo Chico"] },
 
   { slug: "cups", category: "supplies", label: "Cups", need: 1 },
   { slug: "plates", category: "supplies", label: "Plates & napkins", need: 1 },
