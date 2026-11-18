@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { Guest, State } from "@/lib/types";
+import { ArrowUpRight } from "lucide-react";
 import { Avatar, ConfettiBurst, ToastProvider, firstName, useToast } from "./ui";
 import type { Mood } from "./Turkey";
 import { Hero } from "./Hero";
@@ -122,7 +123,7 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
 
   return (
     <AppCtx.Provider value={{ state, api, me, setMeId, asSomeone, editGuest: setEditing, celebrate, mood }}>
-      <TopBar />
+      <TopBar partifulUrl={partifulUrl} />
       <main className="mx-auto max-w-[1040px] px-4 pb-32 sm:px-6">
         <Hero partifulUrl={partifulUrl} />
         <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10">
@@ -137,6 +138,14 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
       </main>
       <footer className="border-t-2 border-line py-8 text-center text-[14px] font-bold text-faint">
         Gobble responsibly. Made by William &amp; Marko.
+        {partifulUrl && (
+          <>
+            {" "}
+            <a href={partifulUrl} target="_blank" rel="noreferrer" className="text-plum underline-offset-2 hover:underline">
+              Back to Partiful
+            </a>
+          </>
+        )}
       </footer>
 
       <GuestSheet id={editing} onClose={() => setEditing(null)} />
@@ -146,7 +155,7 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
   );
 }
 
-function TopBar() {
+function TopBar({ partifulUrl }: { partifulUrl: string }) {
   const { me, editGuest } = useApp();
   return (
     <header className="sticky top-0 z-40 border-b-2 border-line bg-paper/95 backdrop-blur">
@@ -154,6 +163,17 @@ function TopBar() {
         <a href="#" className="text-[19px] font-black tracking-tight text-pumpkin">
           friendsgiving
         </a>
+        <div className="flex items-center gap-1">
+        {partifulUrl && (
+          <a
+            href={partifulUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-plum transition hover:bg-snow"
+          >
+            Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
+          </a>
+        )}
         {me ? (
           <button
             onClick={() => editGuest(me.id)}
@@ -167,6 +187,7 @@ function TopBar() {
             The list
           </a>
         )}
+        </div>
       </div>
     </header>
   );
