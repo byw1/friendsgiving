@@ -44,7 +44,6 @@ export const CATEGORIES = [
 export const SEED_ITEMS: SeedItem[] = [
   { slug: "turkey", category: "mains", label: "Turkey", hint: "or any roast", need: 2 },
   { slug: "pizza", category: "mains", label: "Pizza", need: 1 },
-  { slug: "protein", category: "mains", label: "Another protein", hint: "ham, chicken, wings", need: 2 },
 
   { slug: "mashed", category: "sides", label: "Mashed potatoes", need: 2 },
   { slug: "mac", category: "sides", label: "Mac & cheese", need: 2 },
@@ -54,7 +53,6 @@ export const SEED_ITEMS: SeedItem[] = [
   { slug: "cranberry", category: "sides", label: "Cranberry sauce", need: 1 },
 
   { slug: "pie", category: "dessert", label: "Pie", hint: "pumpkin, apple, pecan", need: 2 },
-  { slug: "sweets", category: "dessert", label: "Something sweet", hint: "cookies, brownies", need: 1 },
 
   { slug: "alcohol", category: "drinks", label: "Alcohol", hint: "wine, beer, a bottle", need: 6,
     options: ["Wine", "Beer", "Seltzers", "Tequila", "Vodka", "Whiskey", "Rum", "Soju"] },

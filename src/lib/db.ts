@@ -87,7 +87,7 @@ async function seed(client: PoolClient) {
   }
   // Items removed from the config disappear. Anyone who already claimed one keeps it as a free-text extra.
   await client.query(
-    `update claims c set label = i.label, item_id = null from items i
+    `update claims c set label = i.label, category = i.category, item_id = null from items i
       where c.item_id = i.id and i.slug is not null and not (i.slug = any($1))`,
     [slugs]
   );
