@@ -8,7 +8,6 @@ import { Hero } from "./Hero";
 import { MyStuff } from "./MyStuff";
 import { BringList } from "./BringList";
 import { People } from "./People";
-import { Hosts } from "./Hosts";
 import { GuestSheet } from "./GuestSheet";
 import { WhoSheet, type WhoRequest } from "./WhoSheet";
 
@@ -133,7 +132,6 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
           </div>
           <div className="contents lg:sticky lg:top-20 lg:block lg:space-y-10">
             <div className="order-1 min-w-0"><MyStuff partifulUrl={partifulUrl} /></div>
-            <div className="order-4 min-w-0"><Hosts /></div>
           </div>
         </div>
       </main>

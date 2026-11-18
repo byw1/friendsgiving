@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import clsx from "clsx";
-import { Check, Loader2, Minus, Plus, X } from "lucide-react";
+import { Check, Crown, Loader2, Minus, Plus, X } from "lucide-react";
+import { HOSTS } from "@/lib/event";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Status } from "@/lib/types";
 
@@ -116,15 +117,46 @@ export function initials(name: string) {
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
 }
 
+/** The hosts: any name made only of host first names, e.g. "William", "Marko", "William & Marko". */
+const HOST_NAMES = new Set(HOSTS.map((h) => h.name.toLowerCase()));
+export function isHost(name: string) {
+  const words = name.toLowerCase().split(/[^a-z]+/).filter((w) => w && w !== "and");
+  return words.length > 0 && words.every((w) => HOST_NAMES.has(w));
+}
+
 export function Avatar({ name, id, size = 36, className }: { name: string; id: number; size?: number; className?: string }) {
-  const c = avatarColors[id % avatarColors.length];
-  return (
+  const host = isHost(name);
+  const c = host ? "linear-gradient(135deg,#ffc800,#ff9600)" : avatarColors[id % avatarColors.length];
+  const face = (
     <span
-      title={name}
-      className={clsx("inline-flex shrink-0 select-none items-center justify-center rounded-full font-black text-white", className)}
-      style={{ width: size, height: size, fontSize: size * 0.4, background: c, boxShadow: `inset 0 -${Math.max(2, size * 0.08)}px 0 rgb(0 0 0 / 0.15)` }}
+      title={host ? `${name} (host)` : name}
+      className={clsx("inline-flex shrink-0 select-none items-center justify-center rounded-full font-black text-white", !host && className)}
+      style={{ width: size, height: size, fontSize: size * (host && initials(name).length > 1 ? 0.36 : 0.4), background: c, boxShadow: `inset 0 -${Math.max(2, size * 0.08)}px 0 rgb(0 0 0 / 0.15)` }}
     >
       {initials(name)}
+    </span>
+  );
+  if (!host) return face;
+  return (
+    <span className={clsx("host-ring relative inline-flex shrink-0 rounded-full p-[2px]", className)}>
+      {face}
+      {size >= 28 && (
+        <Crown
+          className="absolute -top-[38%] left-1/2 -translate-x-1/2 -rotate-12 fill-corn text-corn-dark drop-shadow-sm"
+          style={{ width: size * 0.5, height: size * 0.5 }}
+          strokeWidth={2.5}
+        />
+      )}
+    </span>
+  );
+}
+
+/** Shiny little "HOST" pill. */
+export function HostBadge() {
+  return (
+    <span className="host-shimmer inline-flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-white">
+      <Crown className="size-3 fill-white" strokeWidth={3} />
+      Host
     </span>
   );
 }

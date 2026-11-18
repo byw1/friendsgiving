@@ -26,7 +26,7 @@ import {
 import { CATEGORIES } from "@/lib/event";
 import type { Claim, Item } from "@/lib/types";
 import { useApp } from "./App";
-import { Avatar, Btn, Heading, Sheet, TextInput, bouncy, firstName, useToast } from "./ui";
+import { Avatar, Btn, Heading, Sheet, TextInput, bouncy, firstName, isHost, useToast } from "./ui";
 
 const ICONS: Record<string, [LucideIcon, string]> = {
   turkey: [Drumstick, "#ff9600"],
@@ -219,10 +219,13 @@ function ItemTile({ item }: { item: Item }) {
               ))}
             </div>
             <p className="truncate text-[13px] font-bold text-mute">
-              {item.claims
-                .map((c) => (c.note ? `${firstName(c.guestName)} · ${c.note}` : firstName(c.guestName)))
-                .slice(0, 2)
-                .join(item.options ? ", " : " & ")}
+              {item.claims.slice(0, 2).map((c, i) => (
+                <span key={c.id}>
+                  {i > 0 && (item.options ? ", " : " & ")}
+                  <Who name={c.guestName} />
+                  {c.note && ` · ${c.note}`}
+                </span>
+              ))}
               {item.claims.length > 2 && ` +${item.claims.length - 2}`}
               {item.need > 1 && <span className="text-faint"> · {Math.min(item.claims.length, item.need)}/{item.need}</span>}
             </p>
@@ -346,7 +349,7 @@ function SomethingElse() {
               >
                 <Avatar name={c.guestName} id={c.guestId} size={26} />
                 {c.label}
-                <span className="font-bold text-faint">{firstName(c.guestName)}</span>
+                <span className="whitespace-nowrap font-bold text-faint"><Who name={c.guestName} /></span>
               </motion.button>
             ))}
           </AnimatePresence>
@@ -354,4 +357,9 @@ function SomethingElse() {
       )}
     </div>
   );
+}
+
+/** A name, in shiny gold if it's a host. Hosts keep their full name ("William & Marko"). */
+function Who({ name }: { name: string }) {
+  return isHost(name) ? <span className="host-text font-black">{name}</span> : <>{firstName(name)}</>;
 }

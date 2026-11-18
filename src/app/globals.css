@@ -85,3 +85,35 @@ input, button, textarea { font: inherit; }
     scroll-behavior: auto !important;
   }
 }
+
+/* Hosts get the gold treatment */
+@keyframes host-sweep { to { background-position: -200% 0; } }
+@keyframes host-spin { to { transform: rotate(360deg); } }
+.host-shimmer {
+  background: linear-gradient(100deg, #ff9600 0%, #ffc800 30%, #fff3b0 45%, #ffc800 60%, #ff9600 100%);
+  background-size: 200% 100%;
+  animation: host-sweep 2.4s linear infinite;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
+}
+.host-text {
+  background: linear-gradient(100deg, #e07a00 0%, #ffb300 35%, #ffe17a 50%, #ffb300 65%, #e07a00 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: host-sweep 2.4s linear infinite;
+}
+.host-ring { isolation: isolate; }
+.host-ring::before {
+  content: ""; position: absolute; inset: 0; border-radius: 999px; z-index: -1;
+  background: conic-gradient(#ffc800, #ff9600, #fff3b0, #ffc800, #ff9600, #ffc800);
+  animation: host-spin 3s linear infinite;
+}
+.host-card { position: relative; }
+.host-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 230 140 / 0.45) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation: host-sweep 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .host-shimmer, .host-text, .host-ring::before, .host-card::after { animation: none; }
+}
