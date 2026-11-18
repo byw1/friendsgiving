@@ -5,129 +5,121 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, CalendarDays, Clock, MapPin } from "lucide-react";
 import { EVENT } from "@/lib/event";
 import { useApp } from "./App";
-import { Avatar, Button } from "./ui";
+import { Turkey } from "./Turkey";
+import { Btn, bouncy, firstName } from "./ui";
 
-const ease = [0.22, 1, 0.36, 1] as const;
+const LINES = [
+  "Gobble gobble! Friendsgiving is Saturday.",
+  "Bring a dish. Or cups. Cups count.",
+  "Please don't let us end up with 9 pies.",
+  "I'm the guest of honor. Allegedly.",
+];
 
 export function Hero({ partifulUrl }: { partifulUrl: string }) {
-  const { state, focusRsvp } = useApp();
+  const { state, me, mood } = useApp();
+  const [line, setLine] = useState(0);
   const going = state.guests.filter((g) => g.status === "going");
   const headcount = going.reduce((n, g) => n + 1 + g.plusOnes, 0);
-  const me = state.me;
+
+  const speech =
+    mood === "happy"
+      ? "Yesss! See you there!"
+      : mood === "sad"
+        ? "Aww. We'll save you a plate."
+        : me && line === 0
+          ? `Hey ${firstName(me.name)}! Saturday's gonna be good.`
+          : LINES[line];
 
   return (
-    <section className="relative pb-20 pt-12 sm:pb-24 sm:pt-20">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease }}
-        className="mb-7 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] py-1.5 pl-2 pr-3.5 text-[13px] text-mute backdrop-blur"
-      >
-        <span className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-ember opacity-60" />
-          <span className="relative inline-flex size-2 rounded-full bg-ember" />
-        </span>
-        RSVPs open
-      </motion.div>
-
-      <h1 className="font-serif text-[64px] leading-[0.92] tracking-[-0.02em] min-[400px]:text-[76px] sm:text-[120px]">
-        {["Friends", "giving"].map((w, i) => (
-          <motion.span
-            key={w}
-            initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.9, delay: 0.1 + i * 0.12, ease }}
-            className={i === 1 ? "text-shimmer italic" : "inline-block"}
-            style={{ display: "inline-block" }}
+    <section className="flex flex-col items-center pb-12 pt-8 text-center sm:pt-12">
+      <div className="relative mb-2 flex flex-col items-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={speech}
+            initial={{ opacity: 0, y: 8, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.95 }}
+            transition={bouncy}
+            className="relative mb-3 max-w-[290px] rounded-2xl border-2 border-line bg-paper px-4 py-2.5 text-[15px] font-extrabold text-ink"
           >
-            {w}
-          </motion.span>
-        ))}
-      </h1>
+            {speech}
+            <span className="absolute -bottom-[9px] left-1/2 size-4 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-line bg-paper" />
+          </motion.div>
+        </AnimatePresence>
+        <Turkey mood={mood} size={150} onTap={() => setLine((l) => (l + 1) % LINES.length)} />
+      </div>
 
-      <motion.p
-        initial={{ opacity: 0, y: 14 }}
+      <motion.h1
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.35, ease }}
-        className="mt-6 max-w-[520px] text-[17px] leading-relaxed text-mute sm:text-lg"
+        transition={{ ...bouncy, delay: 0.1 }}
+        className="text-[44px] font-black leading-[1] tracking-tight text-ink sm:text-[64px]"
       >
-        A big table, too much food, and everyone we like. Hosted by William & Marco. Grab something off the list below so
-        we don’t end up with nine pies and no forks.
-      </motion.p>
+        Friendsgiving
+        <span className="mt-1 block text-[24px] text-pumpkin sm:text-[32px]">at The Penthouse</span>
+      </motion.h1>
 
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.45, ease }}
-        className="mt-8 grid max-w-[640px] grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_1.4fr]"
+        transition={{ ...bouncy, delay: 0.2 }}
+        className="mt-6 flex flex-wrap justify-center gap-2"
       >
-        <Detail icon={<CalendarDays className="size-4" />} label="Date" value={EVENT.dateLabel.replace("Saturday, ", "Sat, ")} />
-        <Detail icon={<Clock className="size-4" />} label="Time" value={EVENT.timeLabel} />
-        <Detail className="col-span-2 sm:col-span-1" icon={<MapPin className="size-4" />} label="Where" value={EVENT.place} sub={EVENT.placeDetail} />
+        <Chip icon={<CalendarDays className="size-4" strokeWidth={2.75} />} tone="bg-sky-soft text-sky-dark">
+          Sat, Nov 21
+        </Chip>
+        <Chip icon={<Clock className="size-4" strokeWidth={2.75} />} tone="bg-pumpkin-soft text-pumpkin-dark">
+          {EVENT.timeLabel}
+        </Chip>
+        <Chip icon={<MapPin className="size-4" strokeWidth={2.75} />} tone="bg-leaf-soft text-leaf-dark">
+          {EVENT.placeDetail}
+        </Chip>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...bouncy, delay: 0.3 }} className="mt-7">
+        <Countdown />
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.55, ease }}
-        className="mt-8 flex flex-wrap items-center gap-3"
+        transition={{ ...bouncy, delay: 0.4 }}
+        className="mt-7 flex w-full max-w-[360px] flex-col gap-3"
       >
-        <Button onClick={focusRsvp} className="min-w-[150px]">
-          {me ? "Update my RSVP" : "RSVP"}
-        </Button>
+        <Btn
+          tone="pumpkin"
+          className="w-full"
+          onClick={() => document.getElementById(me ? "list" : "rsvp")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        >
+          {me ? "Pick what to bring" : "I'm coming!"}
+        </Btn>
         {partifulUrl && (
           <a
             href={partifulUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-12 items-center gap-1.5 rounded-2xl border border-line bg-white/[0.03] px-5 text-[15px] font-semibold text-ink transition hover:bg-white/[0.07]"
+            className="ledge inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-line bg-paper px-6 text-[15px] font-extrabold uppercase tracking-wide text-ink hover:bg-snow"
           >
-            Partiful <ArrowUpRight className="size-4 text-mute" />
+            Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
           </a>
         )}
-        <Countdown />
       </motion.div>
 
-      <AnimatePresence>
-        {going.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.7, ease }}
-            className="mt-10 flex items-center gap-3"
-          >
-            <div className="flex -space-x-2">
-              {going.slice(0, 6).map((g, i) => (
-                <motion.span
-                  key={g.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 + i * 0.05 }}
-                >
-                  <Avatar name={g.name} id={g.id} size={32} />
-                </motion.span>
-              ))}
-            </div>
-            <p className="text-sm text-mute">
-              <span className="font-semibold text-ink">{headcount}</span> {headcount === 1 ? "person" : "people"} coming
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {headcount > 0 && (
+        <p className="mt-5 text-[15px] font-bold text-mute">
+          <span className="font-black text-leaf-dark">{headcount}</span> {headcount === 1 ? "person is" : "people are"} coming so far
+        </p>
+      )}
     </section>
   );
 }
 
-function Detail({ icon, label, value, sub, className }: { icon: React.ReactNode; label: string; value: string; sub?: string; className?: string }) {
+function Chip({ icon, tone, children }: { icon: React.ReactNode; tone: string; children: React.ReactNode }) {
   return (
-    <div className={`${className ?? ""} rounded-2xl border border-line bg-white/[0.025] px-4 py-3 backdrop-blur`}>
-      <div className="mb-1 flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.12em] text-faint">
-        {icon}
-        {label}
-      </div>
-      <p className="text-[15px] font-medium text-ink">{value}</p>
-      {sub && <p className="text-[13px] text-mute">{sub}</p>}
-    </div>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[14px] font-extrabold ${tone}`}>
+      {icon}
+      {children}
+    </span>
   );
 }
 
@@ -138,38 +130,34 @@ function Countdown() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  if (now === null) return <div className="h-12 w-[150px]" />;
 
-  const diff = new Date(EVENT.startsAt).getTime() - now;
-  if (diff <= 0) {
-    const over = diff < -6 * 3600 * 1000;
-    return <span className="px-2 text-sm font-medium text-ember">{over ? "Thanks for coming" : "It’s happening now"}</span>;
+  const diff = now === null ? null : new Date(EVENT.startsAt).getTime() - now;
+  if (diff !== null && diff <= 0) {
+    return <p className="text-[18px] font-black text-leaf-dark">{diff < -6 * 3600e3 ? "Thanks for coming!" : "It's happening right now!"}</p>;
   }
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff / 3600000) % 24);
-  const m = Math.floor((diff / 60000) % 60);
-  const s = Math.floor((diff / 1000) % 60);
-  const parts = d > 0 ? [[d, "d"], [h, "h"], [m, "m"]] : [[h, "h"], [m, "m"], [s, "s"]];
+  const d = diff === null ? 0 : Math.floor(diff / 86400000);
+  const h = diff === null ? 0 : Math.floor((diff / 3600000) % 24);
+  const m = diff === null ? 0 : Math.floor((diff / 60000) % 60);
+  const s = diff === null ? 0 : Math.floor((diff / 1000) % 60);
 
   return (
-    <div className="flex h-12 items-center gap-1 px-1 text-sm tabular-nums text-mute" aria-label="Countdown">
-      {parts.map(([v, u]) => (
-        <span key={u as string} className="flex items-baseline">
-          <span className="relative inline-flex h-5 min-w-[1.3ch] justify-end overflow-hidden font-semibold text-ink">
+    <div className="flex gap-2.5" aria-label="Countdown to the party">
+      {[
+        [d, "days"],
+        [h, "hrs"],
+        [m, "min"],
+        [s, "sec"],
+      ].map(([v, u]) => (
+        <div key={u} className="w-[68px] rounded-2xl border-2 border-line pb-2 pt-1.5 ledge">
+          <div className="relative h-9 overflow-hidden text-[28px] font-black tabular-nums text-ink">
             <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span
-                key={v as number}
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "-100%", opacity: 0 }}
-                transition={{ duration: 0.35, ease }}
-              >
-                {String(v).padStart(2, "0")}
+              <motion.span key={String(v)} className="block" initial={{ y: 30 }} animate={{ y: 0 }} exit={{ y: -30 }} transition={bouncy}>
+                {now === null ? "–" : String(v).padStart(2, "0")}
               </motion.span>
             </AnimatePresence>
-          </span>
-          <span className="ml-0.5 mr-1.5 text-faint">{u as string}</span>
-        </span>
+          </div>
+          <div className="text-[11px] font-extrabold uppercase tracking-wider text-faint">{u}</div>
+        </div>
       ))}
     </div>
   );

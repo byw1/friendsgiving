@@ -3,21 +3,65 @@
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import clsx from "clsx";
-import { Check, Plus, Sparkles } from "lucide-react";
+import {
+  Beer,
+  CakeSlice,
+  Check,
+  Cherry,
+  Cookie,
+  CupSoda,
+  Drumstick,
+  GlassWater,
+  Ham,
+  Martini,
+  Plus,
+  Salad,
+  Snowflake,
+  Soup,
+  Sparkles,
+  Utensils,
+  Wheat,
+  Wine,
+  type LucideIcon,
+} from "lucide-react";
 import { CATEGORIES } from "@/lib/event";
 import type { Claim, Item } from "@/lib/types";
 import { useApp } from "./App";
-import { Avatar, Button, Reveal, SectionTitle, spring, useToast } from "./ui";
+import { Avatar, Btn, Heading, TextInput, bouncy, firstName, useToast } from "./ui";
+
+const ICONS: Record<string, [LucideIcon, string]> = {
+  turkey: [Drumstick, "#ff9600"],
+  protein: [Ham, "#ff4b4b"],
+  mashed: [Soup, "#ffc800"],
+  mac: [Soup, "#ff9600"],
+  stuffing: [Wheat, "#c98a54"],
+  veg: [Salad, "#58cc02"],
+  rolls: [Wheat, "#e5a800"],
+  cranberry: [Cherry, "#ff4b4b"],
+  pie: [CakeSlice, "#ff9600"],
+  sweets: [Cookie, "#a0612f"],
+  alcohol: [Wine, "#ce82ff"],
+  chasers: [Martini, "#1cb0f6"],
+  soft: [CupSoda, "#ff4b4b"],
+  ice: [Snowflake, "#1cb0f6"],
+  cups: [GlassWater, "#1cb0f6"],
+  plates: [Utensils, "#777777"],
+  utensils: [Utensils, "#afafaf"],
+};
+const fallbackIcon: [LucideIcon, string] = [Beer, "#ff9600"];
+
+export function claimLabel(c: Claim, items: Item[]) {
+  const base = c.itemId ? items.find((i) => i.id === c.itemId)?.label ?? "Something" : c.label ?? "Something";
+  return c.note ? `${base} (${c.note})` : base;
+}
 
 type Filter = "all" | (typeof CATEGORIES)[number]["key"];
 
 export function BringList() {
   const { state } = useApp();
   const [filter, setFilter] = useState<Filter>("all");
-
   const covered = state.items.filter((i) => i.claims.length >= i.need).length;
   const total = state.items.length;
-  const pct = total ? covered / total : 0;
 
   const groups = useMemo(
     () =>
@@ -28,301 +72,231 @@ export function BringList() {
   );
 
   return (
-    <section id="list" className="scroll-mt-24">
-      <Reveal>
-        <SectionTitle
-          eyebrow="The list"
-          title="What we need"
-          right={<Progress pct={pct} label={`${covered}/${total}`} />}
-        />
-        <p className="-mt-2 mb-6 max-w-[520px] text-[15px] text-mute">
-          Tap anything you can cover. Not seeing your thing? Add it at the bottom. Change your mind any time.
-        </p>
+    <section id="list" className="scroll-mt-20">
+      <Heading sub="Tap anything you can bring. Change your mind any time.">What we need</Heading>
 
-        <LayoutGroup id="filters">
-          <div className="no-scrollbar -mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            {([{ key: "all", label: "All" }, ...CATEGORIES] as { key: Filter; label: string }[]).map((c) => {
-              const active = filter === c.key;
-              return (
-                <button
-                  key={c.key}
-                  onClick={() => setFilter(c.key)}
-                  className={clsx(
-                    "relative shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                    active ? "text-bg" : "text-mute hover:text-ink"
-                  )}
-                >
-                  {active && <motion.span layoutId="filter-pill" transition={spring} className="absolute inset-0 -z-0 rounded-full bg-ink" />}
-                  <span className="relative">{c.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </LayoutGroup>
+      <Progress covered={covered} total={total} />
 
-        <motion.div layout className="overflow-hidden rounded-[24px] border border-line bg-white/[0.02]">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {groups.map((g, gi) => (
-              <motion.div
-                key={g.key}
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className={clsx(gi > 0 && "border-t border-line")}
-              >
-                {filter === "all" && (
-                  <p className="px-4 pb-1 pt-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint sm:px-5">{g.label}</p>
+      <LayoutGroup id="cat">
+        <div className="no-scrollbar -mx-4 mb-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+          {([{ key: "all", label: "All" }, ...CATEGORIES] as { key: Filter; label: string }[]).map((c) => {
+            const on = filter === c.key;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setFilter(c.key)}
+                className={clsx(
+                  "ledge-sm relative shrink-0 rounded-xl border-2 px-4 py-2 text-[14px] font-extrabold",
+                  on ? "border-sky bg-sky-soft text-sky-dark [--ledge:var(--color-sky)]" : "border-line bg-paper text-mute hover:bg-snow"
                 )}
-                <ul>
-                  {g.items.map((item) => (
-                    <ItemRow key={item.id} item={item} />
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+              >
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+      </LayoutGroup>
 
-        <SomethingElse />
-      </Reveal>
+      <div className="space-y-5">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {groups.map((g) => (
+            <motion.div key={g.key} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              {filter === "all" && <p className="mb-2 ml-1 text-[13px] font-extrabold uppercase tracking-wider text-faint">{g.label}</p>}
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {g.items.map((item) => (
+                  <ItemTile key={item.id} item={item} />
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      <SomethingElse />
     </section>
   );
 }
 
-function Progress({ pct, label }: { pct: number; label: string }) {
-  const r = 20;
-  const c = 2 * Math.PI * r;
+function Progress({ covered, total }: { covered: number; total: number }) {
+  const pct = total ? covered / total : 0;
+  const msg =
+    pct === 0 ? "Nothing claimed yet. Be the hero." : pct < 0.5 ? "Off to a good start" : pct < 1 ? "Getting close!" : "Everything's covered. Wow.";
   return (
-    <div className="relative grid size-[54px] shrink-0 place-items-center">
-      <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90">
-        <circle cx="24" cy="24" r={r} fill="none" stroke="rgb(255 255 255 / 0.08)" strokeWidth="3.5" />
-        <motion.circle
-          cx="24"
-          cy="24"
-          r={r}
-          fill="none"
-          stroke="url(#pg)"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          initial={{ strokeDashoffset: c }}
-          animate={{ strokeDashoffset: c * (1 - pct) }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+    <div className="rounded-2xl border-2 border-line p-4">
+      <div className="mb-2.5 flex items-baseline justify-between gap-3">
+        <span className="text-[15px] font-extrabold text-ink">{msg}</span>
+        <span className="text-[15px] font-black tabular-nums text-pumpkin">
+          {covered}/{total}
+        </span>
+      </div>
+      <div className="h-4 overflow-hidden rounded-full bg-line">
+        <motion.div
+          className="shine h-full rounded-full bg-pumpkin"
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.max(pct * 100, pct ? 6 : 0)}%` }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
         />
-        <defs>
-          <linearGradient id="pg" x1="0" x2="1">
-            <stop offset="0" stopColor="#fdba74" />
-            <stop offset="1" stopColor="#ea580c" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <span className="text-[12px] font-semibold tabular-nums">{label}</span>
+      </div>
     </div>
   );
 }
 
-function useClaim() {
-  const { state, api, setPending, focusRsvp } = useApp();
-  const toast = useToast();
-  return async (target: { itemId?: number; label?: string }, name: string) => {
-    if (!state.me) {
-      setPending(target);
-      focusRsvp();
-      toast("RSVP real quick and we’ll lock that in");
-      return false;
-    }
-    const r = await api("/api/claims", { body: target });
-    if (r.state) {
-      toast(`You’re bringing ${name.toLowerCase()}`);
-      return true;
-    }
-    return false;
-  };
-}
-
-function ItemRow({ item }: { item: Item }) {
-  const { state, api, pending } = useApp();
-  const claim = useClaim();
+function ItemTile({ item }: { item: Item }) {
+  const { me, api, asSomeone, editGuest } = useApp();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
-  const mine = state.me ? item.claims.find((c) => c.guestId === state.me!.id) : undefined;
-  const isPending = !state.me && pending?.itemId === item.id;
+  const [Icon, color] = ICONS[item.slug ?? ""] ?? fallbackIcon;
+  const mine = me ? item.claims.find((c) => c.guestId === me.id) : undefined;
   const full = item.claims.length >= item.need;
 
-  const onClick = async () => {
-    setBusy(true);
+  const toggle = async () => {
+    if (busy) return;
     if (mine) {
+      setBusy(true);
       const r = await api(`/api/claims/${mine.id}`, { method: "DELETE" });
-      if (r.state) toast(`Took ${item.label.toLowerCase()} off your list`);
-    } else {
-      await claim({ itemId: item.id }, item.label);
+      setBusy(false);
+      if (r.state) toast(`Took ${item.label.toLowerCase()} off your list`, "info");
+      return;
     }
-    setBusy(false);
+    asSomeone({
+      title: `Who's bringing ${item.label.toLowerCase()}?`,
+      run: async (guestId) => {
+        setBusy(true);
+        const r = await api("/api/claims", { body: { guestId, itemId: item.id } });
+        setBusy(false);
+        if (r.state) toast(`Nice! You're on ${item.label.toLowerCase()}.`);
+      },
+    });
   };
 
   return (
-    <motion.li layout="position" className="flex items-center gap-3 px-4 py-3.5 sm:px-5">
+    <motion.div
+      layout
+      className={clsx(
+        "flex items-center gap-3 rounded-2xl border-2 p-3 transition-colors",
+        mine ? "border-leaf bg-leaf-soft/40" : full ? "border-line bg-snow" : "border-line bg-paper"
+      )}
+    >
+      <span className="relative grid size-12 shrink-0 place-items-center rounded-xl" style={{ background: `${color}22`, color }}>
+        <Icon className="size-6" strokeWidth={2.5} />
+        <AnimatePresence>
+          {full && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={bouncy}
+              className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full bg-leaf text-white ring-2 ring-paper"
+            >
+              <Check className="size-3" strokeWidth={4} />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </span>
+
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className={clsx("truncate text-[15px] font-medium transition-colors", full && !mine ? "text-mute" : "text-ink")}>{item.label}</p>
-          <AnimatePresence>
-            {full && (
-              <motion.span
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={spring}
-                className="grid size-[18px] shrink-0 place-items-center rounded-full bg-sage/20 text-sage"
-              >
-                <Check className="size-3" strokeWidth={3} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-        <Claimers claims={item.claims} need={item.need} hint={item.hint} />
+        <p className={clsx("truncate text-[16px] font-extrabold", full && !mine ? "text-mute" : "text-ink")}>{item.label}</p>
+        {item.claims.length === 0 ? (
+          <p className="truncate text-[13px] font-bold text-faint">
+            {item.hint ?? "Up for grabs"}
+            {item.need > 1 && ` · need ${item.need}`}
+          </p>
+        ) : (
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <div className="flex -space-x-1.5">
+              {item.claims.slice(0, 4).map((c) => (
+                <button key={c.id} onClick={() => editGuest(c.guestId)} className="rounded-full ring-2 ring-paper" aria-label={`Edit ${c.guestName}`}>
+                  <Avatar name={c.guestName} id={c.guestId} size={22} />
+                </button>
+              ))}
+            </div>
+            <p className="truncate text-[13px] font-bold text-mute">
+              {item.claims.map((c) => firstName(c.guestName)).slice(0, 2).join(" & ")}
+              {item.claims.length > 2 && ` +${item.claims.length - 2}`}
+              {item.need > 1 && <span className="text-faint"> · {Math.min(item.claims.length, item.need)}/{item.need}</span>}
+            </p>
+          </div>
+        )}
       </div>
+
       <motion.button
-        whileTap={{ scale: 0.94 }}
-        transition={spring}
+        onClick={toggle}
         disabled={busy}
-        onClick={onClick}
+        whileTap={{ scale: 0.88 }}
+        aria-label={mine ? `Stop bringing ${item.label}` : `Bring ${item.label}`}
         className={clsx(
-          "relative h-10 shrink-0 overflow-hidden rounded-xl px-3.5 text-[13px] font-semibold transition-[background,color,box-shadow] disabled:opacity-60",
-          mine || isPending
-            ? "bg-ember/15 text-ember ring-1 ring-ember/30"
-            : full
-              ? "bg-white/[0.04] text-mute hover:bg-white/[0.08] hover:text-ink"
-              : "bg-ink text-bg hover:bg-white"
+          "ledge-sm grid size-11 shrink-0 place-items-center rounded-xl border-2",
+          mine ? "border-leaf-dark bg-leaf text-white [--ledge:var(--color-leaf-dark)]" : "border-line bg-paper text-sky hover:bg-sky-soft"
         )}
       >
         <AnimatePresence mode="popLayout" initial={false}>
-          <motion.span
-            key={mine || isPending ? "on" : full ? "full" : "off"}
-            initial={{ y: 14, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -14, opacity: 0 }}
-            transition={spring}
-            className="flex items-center gap-1"
-          >
-            {mine || isPending ? (
-              <>
-                <Check className="size-3.5" strokeWidth={3} /> Yours
-              </>
-            ) : full ? (
-              <>
-                <Plus className="size-3.5" strokeWidth={2.5} /> Me too
-              </>
-            ) : (
-              "I got it"
-            )}
+          <motion.span key={mine ? "y" : "n"} initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={bouncy}>
+            {mine ? <Check className="size-5" strokeWidth={4} /> : <Plus className="size-5" strokeWidth={4} />}
           </motion.span>
         </AnimatePresence>
       </motion.button>
-    </motion.li>
-  );
-}
-
-function Claimers({ claims, need, hint }: { claims: Claim[]; need: number; hint: string | null }) {
-  if (!claims.length) {
-    return (
-      <p className="truncate text-[13px] text-faint">
-        {hint ?? "Up for grabs"}
-        {need > 1 && <span> · need {need}</span>}
-      </p>
-    );
-  }
-  const names = claims.map((c) => c.guestName.split(" ")[0]);
-  const text = names.length <= 2 ? names.join(" & ") : `${names.slice(0, 2).join(", ")} +${names.length - 2}`;
-  return (
-    <div className="mt-1 flex items-center gap-2">
-      <div className="flex -space-x-1.5">
-        <AnimatePresence initial={false}>
-          {claims.slice(0, 4).map((c) => (
-            <motion.span key={c.id} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={spring}>
-              <Avatar name={c.guestName} id={c.guestId} size={20} className="ring-[1.5px]" />
-            </motion.span>
-          ))}
-        </AnimatePresence>
-      </div>
-      <p className="truncate text-[13px] text-mute">
-        {text}
-        {need > 1 && (
-          <span className="text-faint">
-            {" "}
-            · {Math.min(claims.length, need)}/{need}
-          </span>
-        )}
-      </p>
-    </div>
+    </motion.div>
   );
 }
 
 function SomethingElse() {
-  const { state, pending } = useApp();
-  const claim = useClaim();
+  const { state, api, asSomeone, editGuest } = useApp();
+  const toast = useToast();
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const v = label.trim();
     if (!v) return;
-    setBusy(true);
-    const ok = await claim({ label: v }, v);
-    setBusy(false);
-    if (ok || !state.me) setLabel("");
+    asSomeone({
+      title: `Who's bringing ${v}?`,
+      run: async (guestId) => {
+        setBusy(true);
+        const r = await api("/api/claims", { body: { guestId, label: v } });
+        setBusy(false);
+        if (r.state) {
+          setLabel("");
+          toast(`Ooh, ${v}. Love it.`);
+        }
+      },
+    });
   };
 
-  const extras = state.extras;
-
   return (
-    <div className="mt-4 rounded-[24px] border border-line bg-white/[0.02] p-4 sm:p-5">
+    <div className="mt-6 rounded-3xl bg-corn-soft p-4 sm:p-5">
       <div className="mb-3 flex items-center gap-2">
-        <Sparkles className="size-4 text-gold" />
-        <p className="text-[15px] font-medium">Bringing something else?</p>
+        <Sparkles className="size-5 text-corn-dark" strokeWidth={2.75} />
+        <p className="text-[17px] font-black text-ink">Bringing something else?</p>
       </div>
       <form onSubmit={submit} className="flex gap-2">
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          maxLength={60}
-          placeholder="Grandma’s lumpia, a speaker, board games…"
-          className="h-12 min-w-0 flex-1 rounded-2xl border border-line bg-white/[0.03] px-4 text-[16px] text-ink outline-none transition placeholder:text-faint focus:border-ember/60 focus:ring-4 focus:ring-ember/10"
-        />
-        <Button loading={busy} disabled={!label.trim()} variant="soft" className="shrink-0 px-4" aria-label="Add">
-          <Plus className="size-5" /> <span className="hidden sm:inline">Add</span>
-        </Button>
+        <TextInput id="extra" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={60} placeholder="Lumpia, a speaker, board games…" className="!bg-paper" />
+        <Btn tone="pumpkin" loading={busy} disabled={!label.trim()} className="shrink-0 !px-4" aria-label="Add">
+          <Plus className="size-5" strokeWidth={3.5} />
+        </Btn>
       </form>
-      {!state.me && pending?.label && (
-        <p className="mt-3 text-[13px] text-mute">
-          Saving <span className="text-ink">{pending.label}</span> once you RSVP.
-        </p>
+      {state.extras.length > 0 && (
+        <motion.div layout className="mt-4 flex flex-wrap gap-2">
+          <AnimatePresence initial={false}>
+            {state.extras.map((c) => (
+              <motion.button
+                layout
+                key={c.id}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                transition={bouncy}
+                onClick={() => editGuest(c.guestId)}
+                className="flex items-center gap-2 rounded-xl bg-paper py-1 pl-1 pr-3 text-[14px] font-extrabold text-ink"
+              >
+                <Avatar name={c.guestName} id={c.guestId} size={26} />
+                {c.label}
+                <span className="font-bold text-faint">{firstName(c.guestName)}</span>
+              </motion.button>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
-      <AnimatePresence initial={false}>
-        {extras.length > 0 && (
-          <motion.ul initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4 flex flex-wrap gap-2">
-            <AnimatePresence initial={false}>
-              {extras.map((c) => (
-                <motion.li
-                  key={c.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={spring}
-                  className="flex items-center gap-2 rounded-full border border-line bg-white/[0.03] py-1 pl-1 pr-3 text-[13px]"
-                >
-                  <Avatar name={c.guestName} id={c.guestId} size={22} className="ring-0" />
-                  <span className="font-medium text-ink">{c.label}</span>
-                  <span className="text-faint">{c.guestName.split(" ")[0]}</span>
-                </motion.li>
-              ))}
-            </AnimatePresence>
-          </motion.ul>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

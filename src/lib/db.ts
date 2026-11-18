@@ -52,6 +52,8 @@ create table if not exists claims (
 create index if not exists claims_guest_idx on claims(guest_id);
 create index if not exists claims_item_idx on claims(item_id);
 
+alter table guests alter column email drop not null;
+
 create table if not exists login_tokens (
   token_hash text primary key,
   guest_id int not null references guests(id) on delete cascade,

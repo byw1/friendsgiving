@@ -1,40 +1,30 @@
 "use client";
 
-import { motion } from "motion/react";
+import { ChefHat } from "lucide-react";
 import { HOSTS } from "@/lib/event";
-import { Avatar, Reveal, SectionTitle } from "./ui";
+import { Avatar, Heading } from "./ui";
 
 export function Hosts() {
   return (
-    <section id="hosts" className="scroll-mt-24">
-      <Reveal>
-        <SectionTitle eyebrow="Your hosts" title="From the hosts" />
-        <div className="space-y-2">
-          {HOSTS.map((h, i) => (
-            <motion.div
-              key={h.name}
-              whileHover={{ y: -2 }}
-              className="flex items-start gap-3.5 rounded-2xl border border-line bg-white/[0.025] p-4"
-            >
-              <Avatar name={h.name} id={i + 2} size={42} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[15px] font-semibold">{h.name}</p>
-                  <span className="text-[12px] font-medium uppercase tracking-[0.12em] text-faint">{h.role}</span>
-                </div>
-                {h.plan ? (
-                  <p className="mt-1 text-sm text-mute">{h.plan}</p>
-                ) : (
-                  <div className="mt-2 space-y-1.5">
-                    <p className="text-[13px] text-faint">Menu’s being figured out</p>
-                    <div className="skeleton h-2 w-4/5 rounded-full" />
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </Reveal>
+    <section id="hosts">
+      <Heading sub="What we're handling">Your hosts</Heading>
+      <div className="grid gap-2.5">
+        {HOSTS.map((h, i) => (
+          <div key={h.name} className="flex items-center gap-3 rounded-2xl border-2 border-line p-3.5">
+            <Avatar name={h.name} id={i === 0 ? 1 : 3} size={46} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[17px] font-black text-ink">{h.name}</p>
+              {h.plan ? (
+                <p className="text-[14px] font-bold text-mute">{h.plan}</p>
+              ) : (
+                <p className="flex items-center gap-1.5 text-[14px] font-bold text-faint">
+                  <ChefHat className="size-4" strokeWidth={2.75} /> Cooking up a plan. Stay tuned.
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

@@ -14,14 +14,10 @@ export async function body<T = Record<string, unknown>>(req: Request): Promise<P
 export const clean = (v: unknown, max: number) =>
   typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "";
 
-export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && v.length <= 200;
+export const STATUSES = ["going", "maybe", "cant"] as const;
+export const isStatus = (v: unknown) => (STATUSES as readonly string[]).includes(String(v));
 
-const recent = new Map<string, number>();
-/** Very small in-memory throttle so nobody can spam login emails. */
-export function throttled(key: string, ms = 30_000) {
-  const now = Date.now();
-  const last = recent.get(key) ?? 0;
-  if (now - last < ms) return true;
-  recent.set(key, now);
-  return false;
-}
+export const toInt = (v: unknown) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};

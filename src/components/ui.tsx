@@ -2,216 +2,321 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import clsx from "clsx";
-import { Loader2 } from "lucide-react";
-import { createContext, useCallback, useContext, useId, useState, type ReactNode } from "react";
+import { Check, Loader2, Minus, Plus, X } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { Status } from "@/lib/types";
 
-export const spring = { type: "spring" as const, stiffness: 420, damping: 34 };
+export const bouncy = { type: "spring" as const, stiffness: 500, damping: 22 };
+export const soft = { type: "spring" as const, stiffness: 380, damping: 30 };
 
-export function Segmented<T extends string>({
-  value,
-  onChange,
-  options,
-  size = "md",
-}: {
-  value: T;
-  onChange: (v: T) => void;
-  options: { value: T; label: ReactNode; tone?: string }[];
-  size?: "sm" | "md";
+/* ---------- Buttons ---------- */
+
+const tones = {
+  pumpkin: "bg-pumpkin text-white [--ledge:var(--color-pumpkin-dark)] hover:brightness-105",
+  leaf: "bg-leaf text-white [--ledge:var(--color-leaf-dark)] hover:brightness-105",
+  sky: "bg-sky text-white [--ledge:var(--color-sky-dark)] hover:brightness-105",
+  berry: "bg-berry text-white [--ledge:var(--color-berry-dark)] hover:brightness-105",
+  white: "bg-paper text-ink border-2 border-line [--ledge:var(--color-line)] hover:bg-snow",
+  ghost: "bg-transparent text-sky hover:bg-sky-soft",
+};
+
+export function Btn({
+  children,
+  tone = "pumpkin",
+  loading,
+  className,
+  size = "lg",
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  tone?: keyof typeof tones;
+  loading?: boolean;
+  size?: "lg" | "md" | "sm";
 }) {
-  const id = useId();
   return (
-    <div
-      role="radiogroup"
+    <button
+      {...props}
+      disabled={loading || props.disabled}
       className={clsx(
-        "relative grid rounded-2xl border border-line bg-white/[0.02] p-1",
-        size === "sm" ? "text-[13px]" : "text-sm"
+        "inline-flex select-none items-center justify-center gap-2 rounded-2xl font-extrabold uppercase tracking-wide disabled:cursor-not-allowed",
+        tone !== "ghost" && (size === "sm" ? "ledge-sm" : "ledge"),
+        size === "lg" && "h-[52px] px-6 text-[15px]",
+        size === "md" && "h-11 px-4 text-[13px]",
+        size === "sm" && "h-9 rounded-xl px-3 text-[12px]",
+        tones[tone],
+        props.disabled && !loading && "!bg-line !text-faint ![--ledge:#d6d6d6]",
+        className
       )}
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
-      {options.map((o) => {
-        const active = o.value === value;
+      {loading ? <Loader2 className="size-5 animate-spin" /> : children}
+    </button>
+  );
+}
+
+/* ---------- Status ---------- */
+
+export const STATUS: Record<Status, { label: string; short: string; bg: string; soft: string; text: string; ledge: string }> = {
+  going: { label: "I'm in!", short: "Going", bg: "bg-leaf", soft: "bg-leaf-soft", text: "text-leaf-dark", ledge: "var(--color-leaf-dark)" },
+  maybe: { label: "Maybe", short: "Maybe", bg: "bg-corn", soft: "bg-corn-soft", text: "text-corn-dark", ledge: "var(--color-corn-dark)" },
+  cant: { label: "Can't make it", short: "Can't go", bg: "bg-berry", soft: "bg-berry-soft", text: "text-berry-dark", ledge: "var(--color-berry-dark)" },
+};
+
+export function StatusPicker({ value, onChange }: { value: Status | null; onChange: (s: Status) => void }) {
+  return (
+    <div className="grid grid-cols-3 gap-2.5" role="radiogroup" aria-label="Are you coming?">
+      {(Object.keys(STATUS) as Status[]).map((s) => {
+        const on = value === s;
+        const meta = STATUS[s];
         return (
-          <button
-            key={o.value}
+          <motion.button
+            key={s}
             type="button"
             role="radio"
-            aria-checked={active}
-            onClick={() => onChange(o.value)}
+            aria-checked={on}
+            onClick={() => onChange(s)}
+            whileTap={{ scale: 0.95 }}
+            animate={on ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{ ["--ledge" as string]: on ? meta.ledge : "var(--color-line)" }}
             className={clsx(
-              "relative z-0 flex items-center justify-center gap-1.5 rounded-xl font-medium transition-colors",
-              size === "sm" ? "h-9 px-2" : "h-11 px-3",
-              active ? "text-bg" : "text-mute hover:text-ink"
+              "ledge flex h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl border-2 px-1 text-[13px] font-extrabold",
+              on ? `${meta.soft} ${meta.text} border-current` : "border-line bg-paper text-mute hover:bg-snow"
             )}
           >
-            {active && (
-              <motion.span
-                layoutId={`seg-${id}`}
-                transition={spring}
-                className={clsx("absolute inset-0 -z-10 rounded-xl shadow-[0_1px_12px_-2px_rgb(0_0_0/0.5)]", o.tone ?? "bg-ink")}
-              />
-            )}
-            {o.label}
-          </button>
+            <StatusFace status={s} on={on} />
+            {meta.short}
+          </motion.button>
         );
       })}
     </div>
   );
 }
 
-const avatarTones = [
-  "from-orange-300 to-amber-500",
-  "from-rose-300 to-orange-400",
-  "from-amber-200 to-yellow-500",
-  "from-lime-200 to-emerald-400",
-  "from-stone-200 to-stone-400",
-  "from-orange-200 to-red-400",
-];
+/** Tiny drawn faces so the choice reads at a glance */
+export function StatusFace({ status, on = true, size = 30 }: { status: Status; on?: boolean; size?: number }) {
+  const fill = on ? (status === "going" ? "#58cc02" : status === "maybe" ? "#ffc800" : "#ff4b4b") : "#e5e5e5";
+  const eye = on ? "#3c3c3c" : "#afafaf";
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <circle cx="16" cy="16" r="14" fill={fill} />
+      <circle cx="11.5" cy="13.5" r="2" fill={eye} />
+      <circle cx="20.5" cy="13.5" r="2" fill={eye} />
+      {status === "going" && <path d="M10 18.5c1.6 3 3.6 4.2 6 4.2s4.4-1.2 6-4.2" stroke={eye} strokeWidth="2.4" fill="none" strokeLinecap="round" />}
+      {status === "maybe" && <path d="M11 21h10" stroke={eye} strokeWidth="2.4" strokeLinecap="round" />}
+      {status === "cant" && <path d="M10.5 22.5c1.6-2.6 3.5-3.6 5.5-3.6s3.9 1 5.5 3.6" stroke={eye} strokeWidth="2.4" fill="none" strokeLinecap="round" />}
+    </svg>
+  );
+}
+
+/* ---------- People ---------- */
+
+const avatarColors = ["#ff9600", "#1cb0f6", "#58cc02", "#ce82ff", "#ff4b4b", "#ffc800", "#2b70c9", "#ff86d0"];
 
 export function initials(name: string) {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase() || "?";
 }
 
-export function Avatar({ name, id, size = 32, className }: { name: string; id: number; size?: number; className?: string }) {
+export function Avatar({ name, id, size = 36, className }: { name: string; id: number; size?: number; className?: string }) {
+  const c = avatarColors[id % avatarColors.length];
   return (
     <span
       title={name}
-      className={clsx(
-        "inline-flex shrink-0 select-none items-center justify-center rounded-full bg-gradient-to-br font-semibold text-stone-900 ring-2 ring-bg",
-        avatarTones[id % avatarTones.length],
-        className
-      )}
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      className={clsx("inline-flex shrink-0 select-none items-center justify-center rounded-full font-black text-white", className)}
+      style={{ width: size, height: size, fontSize: size * 0.4, background: c, boxShadow: `inset 0 -${Math.max(2, size * 0.08)}px 0 rgb(0 0 0 / 0.15)` }}
     >
       {initials(name)}
     </span>
   );
 }
 
-export function Button({
-  children,
-  loading,
-  variant = "primary",
-  className,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { loading?: boolean; variant?: "primary" | "ghost" | "soft" }) {
+export const firstName = (n: string) => n.trim().split(/\s+/)[0] ?? n;
+
+/* ---------- Inputs ---------- */
+
+export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      transition={spring}
-      disabled={loading || props.disabled}
+    <input
+      {...props}
       className={clsx(
-        "relative inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-semibold transition-[background,color,opacity,box-shadow] disabled:opacity-60",
-        variant === "primary" &&
-          "bg-gradient-to-b from-[#fdba74] to-ember-deep text-stone-950 shadow-[0_8px_30px_-8px_rgb(234_88_12/0.7),inset_0_1px_0_rgb(255_255_255/0.4)] hover:brightness-105",
-        variant === "ghost" && "border border-line bg-white/[0.03] text-ink hover:bg-white/[0.07]",
-        variant === "soft" && "bg-white/[0.06] text-ink hover:bg-white/[0.1]",
-        className
+        "h-[52px] w-full rounded-2xl border-2 border-line bg-snow px-4 text-[17px] font-bold text-ink outline-none transition placeholder:font-semibold placeholder:text-faint focus:border-sky focus:bg-paper",
+        props.className
       )}
-      {...(props as React.ComponentProps<typeof motion.button>)}
-    >
-      <AnimatePresence mode="popLayout" initial={false}>
-        {loading ? (
-          <motion.span key="l" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-            <Loader2 className="size-5 animate-spin" />
-          </motion.span>
-        ) : (
-          <motion.span
-            key="c"
-            className="inline-flex items-center gap-2"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            {children}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </motion.button>
+    />
   );
 }
 
-export function Field({
-  label,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+export function Stepper({ value, onChange, max = 5 }: { value: number; onChange: (n: number) => void; max?: number }) {
   return (
-    <label className="group block">
-      <span className="mb-1.5 block text-[13px] font-medium text-mute">{label}</span>
-      <input
-        {...props}
-        className={clsx(
-          "h-12 w-full rounded-2xl border border-line bg-white/[0.03] px-4 text-[16px] text-ink placeholder:text-faint outline-none transition",
-          "focus:border-ember/60 focus:bg-white/[0.05] focus:ring-4 focus:ring-ember/10",
-          props.className
-        )}
-      />
-    </label>
+    <div className="flex items-center gap-2">
+      <Btn tone="white" size="sm" className="!w-9 !px-0" aria-label="Fewer" disabled={value <= 0} onClick={() => onChange(value - 1)}>
+        <Minus className="size-4" strokeWidth={3} />
+      </Btn>
+      <span className="relative w-7 overflow-hidden text-center text-xl font-black tabular-nums">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span key={value} className="inline-block" initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }} transition={bouncy}>
+            {value}
+          </motion.span>
+        </AnimatePresence>
+      </span>
+      <Btn tone="white" size="sm" className="!w-9 !px-0" aria-label="More" disabled={value >= max} onClick={() => onChange(value + 1)}>
+        <Plus className="size-4" strokeWidth={3} />
+      </Btn>
+    </div>
   );
 }
 
-export function SectionTitle({ eyebrow, title, right }: { eyebrow: string; title: ReactNode; right?: ReactNode }) {
+/* ---------- Layout bits ---------- */
+
+export function Card({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={clsx("rounded-3xl border-2 border-line bg-paper", className)}>{children}</div>;
+}
+
+export function Heading({ children, sub, right }: { children: ReactNode; sub?: ReactNode; right?: ReactNode }) {
   return (
-    <div className="mb-5 flex items-end justify-between gap-4">
-      <div>
-        <p className="mb-1.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ember">{eyebrow}</p>
-        <h2 className="font-serif text-[34px] leading-none tracking-tight text-ink sm:text-[40px]">{title}</h2>
+    <div className="mb-4 flex items-end justify-between gap-3">
+      <div className="min-w-0">
+        <h2 className="text-[26px] font-black leading-tight tracking-tight text-ink">{children}</h2>
+        {sub && <p className="mt-0.5 text-[15px] font-semibold text-mute">{sub}</p>}
       </div>
       {right}
     </div>
   );
 }
 
-export function Reveal({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
+/* ---------- Sheet ---------- */
+
+export function Sheet({ open, onClose, children, title }: { open: boolean; onClose: () => void; children: ReactNode; title?: ReactNode }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
+          <motion.div className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+          <motion.div
+            role="dialog"
+            aria-modal
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 420, damping: 38 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={(_, info) => info.offset.y > 120 && onClose()}
+            className="relative max-h-[88dvh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-paper px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-3 sm:rounded-[28px] sm:pt-5"
+          >
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-line sm:hidden" />
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="min-w-0 text-[22px] font-black">{title}</div>
+              <button onClick={onClose} aria-label="Close" className="grid size-10 shrink-0 place-items-center rounded-full text-faint transition hover:bg-snow hover:text-ink">
+                <X className="size-6" strokeWidth={3} />
+              </button>
+            </div>
+            {children}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
-/* ---------- Toasts ---------- */
+/* ---------- Toasts (bottom banner, like a correct-answer bar) ---------- */
 
-type Toast = { id: number; text: string; tone: "ok" | "err" };
+type Toast = { id: number; text: string; tone: "ok" | "err" | "info" };
 const ToastCtx = createContext<(text: string, tone?: Toast["tone"]) => void>(() => {});
 export const useToast = () => useContext(ToastCtx);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toast, setToast] = useState<Toast | null>(null);
   const push = useCallback((text: string, tone: Toast["tone"] = "ok") => {
     const id = Date.now() + Math.random();
-    setToasts((t) => [...t.slice(-2), { id, text, tone }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3200);
+    setToast({ id, text, tone });
+    setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 2600);
   }, []);
   return (
     <ToastCtx.Provider value={push}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 bottom-[max(16px,env(safe-area-inset-bottom))] z-50 flex flex-col items-center gap-2 px-4">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-center px-3 pb-[max(12px,env(safe-area-inset-bottom))]">
         <AnimatePresence>
-          {toasts.map((t) => (
+          {toast && (
             <motion.div
-              key={t.id}
-              layout
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95, transition: { duration: 0.15 } }}
-              transition={spring}
+              key={toast.id}
+              initial={{ y: 120 }}
+              animate={{ y: 0 }}
+              exit={{ y: 140 }}
+              transition={{ type: "spring", stiffness: 500, damping: 34 }}
               className={clsx(
-                "rounded-full border px-4 py-2.5 text-sm font-medium shadow-2xl backdrop-blur-xl",
-                t.tone === "ok" ? "border-white/10 bg-stone-900/90 text-ink" : "border-red-400/30 bg-red-950/90 text-red-100"
+                "flex w-full max-w-lg items-center gap-3 rounded-2xl px-4 py-3.5 text-[16px] font-extrabold shadow-[0_8px_30px_rgb(0_0_0/0.12)]",
+                toast.tone === "ok" && "bg-leaf-soft text-leaf-dark",
+                toast.tone === "err" && "bg-berry-soft text-berry-dark",
+                toast.tone === "info" && "bg-sky-soft text-sky-dark"
               )}
             >
-              {t.text}
+              <motion.span
+                initial={{ scale: 0, rotate: -90 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...bouncy, delay: 0.08 }}
+                className={clsx(
+                  "grid size-8 shrink-0 place-items-center rounded-full text-white",
+                  toast.tone === "ok" ? "bg-leaf" : toast.tone === "err" ? "bg-berry" : "bg-sky"
+                )}
+              >
+                {toast.tone === "err" ? <X className="size-5" strokeWidth={3.5} /> : <Check className="size-5" strokeWidth={3.5} />}
+              </motion.span>
+              {toast.text}
             </motion.div>
-          ))}
+          )}
         </AnimatePresence>
       </div>
     </ToastCtx.Provider>
+  );
+}
+
+/* ---------- Confetti ---------- */
+
+const confettiColors = ["#ff9600", "#58cc02", "#1cb0f6", "#ffc800", "#ff4b4b", "#ce82ff"];
+
+export function ConfettiBurst({ fire }: { fire: number }) {
+  const [pieces, setPieces] = useState<{ id: number; x: number; y: number; r: number; c: string; d: number; round: boolean }[]>([]);
+  useEffect(() => {
+    if (!fire) return;
+    setPieces(
+      Array.from({ length: 70 }, (_, i) => ({
+        id: fire * 1000 + i,
+        x: (Math.random() - 0.5) * (typeof window !== "undefined" ? Math.min(window.innerWidth, 700) : 400),
+        y: -(180 + Math.random() * 320),
+        r: (Math.random() - 0.5) * 720,
+        c: confettiColors[i % confettiColors.length],
+        d: Math.random() * 0.15,
+        round: Math.random() > 0.6,
+      }))
+    );
+    const t = setTimeout(() => setPieces([]), 2200);
+    return () => clearTimeout(t);
+  }, [fire]);
+  return (
+    <div className="pointer-events-none fixed bottom-24 left-1/2 z-[70]" aria-hidden>
+      {pieces.map((p) => (
+        <motion.span
+          key={p.id}
+          className="absolute block"
+          style={{ background: p.c, width: p.round ? 9 : 8, height: p.round ? 9 : 14, borderRadius: p.round ? 99 : 2 }}
+          initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
+          animate={{ x: p.x, y: [0, p.y, p.y + 520], rotate: p.r, opacity: [1, 1, 0] }}
+          transition={{ duration: 1.9, delay: p.d, ease: [0.15, 0.6, 0.4, 1], times: [0, 0.35, 1] }}
+        />
+      ))}
+    </div>
   );
 }

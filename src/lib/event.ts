@@ -7,8 +7,8 @@ export const EVENT = {
   timeZone: "America/Los_Angeles",
   dateLabel: "Saturday, November 21",
   timeLabel: "6:00 PM",
-  place: "William's office",
-  placeDetail: "Address is on the Partiful",
+  place: "The Penthouse",
+  placeDetail: "William's office",
   partifulUrl: process.env.PARTIFUL_URL || "",
 };
 

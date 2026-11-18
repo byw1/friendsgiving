@@ -11,6 +11,7 @@ export type Claim = {
 
 export type Item = {
   id: number;
+  slug: string | null;
   category: string;
   label: string;
   hint: string | null;
@@ -23,20 +24,10 @@ export type Guest = {
   name: string;
   status: Status;
   plusOnes: number;
-  bringing: string[];
-};
-
-export type Me = {
-  id: number;
-  name: string;
-  email: string;
-  status: Status;
-  plusOnes: number;
   claims: Claim[];
 };
 
 export type State = {
-  me: Me | null;
   items: Item[];
   extras: Claim[];
   guests: Guest[];

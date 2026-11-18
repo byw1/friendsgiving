@@ -1,31 +1,36 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import type { State } from "@/lib/types";
-import { ToastProvider, useToast } from "./ui";
-import { Header } from "./Header";
+import type { Guest, State } from "@/lib/types";
+import { Avatar, ConfettiBurst, ToastProvider, firstName, useToast } from "./ui";
+import type { Mood } from "./Turkey";
 import { Hero } from "./Hero";
 import { Rsvp } from "./Rsvp";
 import { BringList } from "./BringList";
-import { Guests } from "./Guests";
+import { Crew } from "./Crew";
 import { Hosts } from "./Hosts";
+import { GuestSheet } from "./GuestSheet";
+import { WhoSheet, type WhoRequest } from "./WhoSheet";
 
-type Api = <T = { state?: State; error?: string } & Record<string, unknown>>(
-  path: string,
-  init?: { method?: string; body?: unknown }
-) => Promise<T>;
+type ApiResult = { state?: State; error?: string; id?: number; existed?: boolean };
+type Api = (path: string, init?: { method?: string; body?: unknown }) => Promise<ApiResult>;
 
 type Ctx = {
   state: State;
   api: Api;
-  /** Item the visitor tapped before RSVPing; claimed automatically once they do. */
-  pending: { itemId?: number; label?: string } | null;
-  setPending: (p: Ctx["pending"]) => void;
-  focusRsvp: () => void;
+  me: Guest | null;
+  setMeId: (id: number | null) => void;
+  /** Run something "as" a guest, asking who you are first if we don't know. */
+  asSomeone: (req: WhoRequest) => void;
+  editGuest: (id: number) => void;
+  celebrate: (mood: Mood) => void;
+  mood: Mood;
 };
 
 const AppCtx = createContext<Ctx | null>(null);
 export const useApp = () => useContext(AppCtx)!;
+
+const ME_KEY = "fg_me";
 
 export function App({ initial, partifulUrl }: { initial: State; partifulUrl: string }) {
   return (
@@ -37,9 +42,30 @@ export function App({ initial, partifulUrl }: { initial: State; partifulUrl: str
 
 function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }) {
   const [state, setState] = useState(initial);
-  const [pending, setPending] = useState<Ctx["pending"]>(null);
+  const [meId, setMeIdState] = useState<number | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [who, setWho] = useState<WhoRequest | null>(null);
+  const [mood, setMood] = useState<Mood>("idle");
+  const [confetti, setConfetti] = useState(0);
   const toast = useToast();
   const busy = useRef(0);
+
+  useEffect(() => {
+    try {
+      const v = Number(localStorage.getItem(ME_KEY));
+      if (v) setMeIdState(v);
+    } catch {}
+  }, []);
+
+  const setMeId = useCallback((id: number | null) => {
+    setMeIdState(id);
+    try {
+      if (id) localStorage.setItem(ME_KEY, String(id));
+      else localStorage.removeItem(ME_KEY);
+    } catch {}
+  }, []);
+
+  const me = state.guests.find((g) => g.id === meId) ?? null;
 
   const api: Api = useCallback(
     async (path, init) => {
@@ -50,13 +76,13 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
           headers: init?.body ? { "content-type": "application/json" } : undefined,
           body: init?.body ? JSON.stringify(init.body) : undefined,
         });
-        const data = await res.json().catch(() => ({}));
-        if (data?.state) setState(data.state);
-        if (!res.ok && data?.error) toast(data.error, "err");
-        return data;
+        const data: ApiResult = await res.json().catch(() => ({}));
+        if (data.state) setState(data.state);
+        if (!res.ok) toast(data.error ?? "Something went sideways. Try again?", "err");
+        return res.ok ? data : { ...data, error: data.error ?? "error" };
       } catch {
-        toast("Couldn't reach the server. Try again?", "err");
-        return { error: "network" } as never;
+        toast("Can't reach the server. Try again?", "err");
+        return { error: "network" };
       } finally {
         busy.current--;
       }
@@ -64,7 +90,7 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
     [toast]
   );
 
-  // Keep everyone's view fresh without a refresh.
+  // Keep everyone's view fresh.
   useEffect(() => {
     const tick = async () => {
       if (document.hidden || busy.current > 0) return;
@@ -73,7 +99,7 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
         if (res.ok && busy.current === 0) setState(await res.json());
       } catch {}
     };
-    const t = setInterval(tick, 12000);
+    const t = setInterval(tick, 10000);
     document.addEventListener("visibilitychange", tick);
     return () => {
       clearInterval(t);
@@ -81,61 +107,69 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
     };
   }, []);
 
-  // Feedback after following an email link.
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    const s = p.get("signin");
-    if (!s) return;
-    if (s === "ok") toast("You're signed in");
-    if (s === "expired") toast("That link expired. Grab a fresh one.", "err");
-    window.history.replaceState(null, "", window.location.pathname);
-  }, [toast]);
-
-  const focusRsvp = useCallback(() => {
-    document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setTimeout(() => document.querySelector<HTMLInputElement>("#rsvp input")?.focus({ preventScroll: true }), 500);
+  const celebrate = useCallback((m: Mood) => {
+    setMood(m);
+    if (m === "happy") setConfetti((c) => c + 1);
+    setTimeout(() => setMood("idle"), 1200);
   }, []);
 
+  const asSomeone = useCallback(
+    (req: WhoRequest) => {
+      if (me) req.run(me.id);
+      else setWho(req);
+    },
+    [me]
+  );
+
   return (
-    <AppCtx.Provider value={{ state, api, pending, setPending, focusRsvp }}>
-      <div className="grain relative">
-        <Backdrop />
-        <Header />
-        <main className="relative mx-auto max-w-[1080px] px-4 pb-28 sm:px-6">
-          <Hero partifulUrl={partifulUrl} />
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-y-20 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-x-12">
-            {/* On phones everything stacks: RSVP, list, guests, hosts. On desktop the RSVP card rides along on the right. */}
-            <div className="contents lg:block lg:space-y-20">
-              <div className="order-2 min-w-0"><BringList /></div>
-              <div className="order-3 min-w-0"><Guests /></div>
-            </div>
-            <div className="contents lg:sticky lg:top-24 lg:block lg:space-y-16">
-              <div className="order-1 min-w-0"><Rsvp /></div>
-              <div className="order-4 min-w-0"><Hosts /></div>
-            </div>
+    <AppCtx.Provider value={{ state, api, me, setMeId, asSomeone, editGuest: setEditing, celebrate, mood }}>
+      <TopBar />
+      <main className="mx-auto max-w-[1040px] px-4 pb-32 sm:px-6">
+        <Hero partifulUrl={partifulUrl} />
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10">
+          <div className="contents lg:block lg:space-y-14">
+            <div className="order-2 min-w-0"><BringList /></div>
+            <div className="order-3 min-w-0"><Crew /></div>
           </div>
-        </main>
-        <footer className="relative border-t border-line py-10 text-center text-[13px] text-faint">
-          Made with love (and a lot of carbs) by William & Marco
-        </footer>
-      </div>
+          <div className="contents lg:sticky lg:top-20 lg:block lg:space-y-10">
+            <div className="order-1 min-w-0"><Rsvp /></div>
+            <div className="order-4 min-w-0"><Hosts /></div>
+          </div>
+        </div>
+      </main>
+      <footer className="border-t-2 border-line py-8 text-center text-[14px] font-bold text-faint">
+        Gobble responsibly. Made by William &amp; Marco.
+      </footer>
+
+      <GuestSheet id={editing} onClose={() => setEditing(null)} />
+      <WhoSheet request={who} onClose={() => setWho(null)} />
+      <ConfettiBurst fire={confetti} />
     </AppCtx.Provider>
   );
 }
 
-function Backdrop() {
+function TopBar() {
+  const { me, editGuest } = useApp();
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[900px] overflow-hidden">
-      <div className="absolute left-1/2 top-[-380px] h-[760px] w-[1100px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(234_88_12/0.30),rgb(234_88_12/0.06)_60%,transparent)] blur-2xl" />
-      <div className="absolute left-[8%] top-[160px] h-[300px] w-[300px] rounded-full bg-[radial-gradient(closest-side,rgb(252_211_77/0.10),transparent)] blur-2xl" />
-      <div
-        className="absolute inset-0 opacity-[0.35] [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-        }}
-      />
-    </div>
+    <header className="sticky top-0 z-40 border-b-2 border-line bg-paper/95 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-[1040px] items-center justify-between px-4 sm:px-6">
+        <a href="#" className="text-[19px] font-black tracking-tight text-pumpkin">
+          friendsgiving
+        </a>
+        {me ? (
+          <button
+            onClick={() => editGuest(me.id)}
+            className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[14px] font-extrabold text-ink transition hover:bg-snow"
+          >
+            <Avatar name={me.name} id={me.id} size={30} />
+            {firstName(me.name)}
+          </button>
+        ) : (
+          <a href="#rsvp" className="rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-sky transition hover:bg-sky-soft">
+            RSVP
+          </a>
+        )}
+      </div>
+    </header>
   );
 }
