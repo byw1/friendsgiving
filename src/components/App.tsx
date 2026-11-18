@@ -5,9 +5,9 @@ import type { Guest, State } from "@/lib/types";
 import { Avatar, ConfettiBurst, ToastProvider, firstName, useToast } from "./ui";
 import type { Mood } from "./Turkey";
 import { Hero } from "./Hero";
-import { Rsvp } from "./Rsvp";
+import { MyStuff } from "./MyStuff";
 import { BringList } from "./BringList";
-import { Crew } from "./Crew";
+import { People } from "./People";
 import { Hosts } from "./Hosts";
 import { GuestSheet } from "./GuestSheet";
 import { WhoSheet, type WhoRequest } from "./WhoSheet";
@@ -129,16 +129,16 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
         <div className="grid grid-cols-[minmax(0,1fr)] gap-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10">
           <div className="contents lg:block lg:space-y-14">
             <div className="order-2 min-w-0"><BringList /></div>
-            <div className="order-3 min-w-0"><Crew /></div>
+            <div className="order-3 min-w-0"><People /></div>
           </div>
           <div className="contents lg:sticky lg:top-20 lg:block lg:space-y-10">
-            <div className="order-1 min-w-0"><Rsvp /></div>
+            <div className="order-1 min-w-0"><MyStuff partifulUrl={partifulUrl} /></div>
             <div className="order-4 min-w-0"><Hosts /></div>
           </div>
         </div>
       </main>
       <footer className="border-t-2 border-line py-8 text-center text-[14px] font-bold text-faint">
-        Gobble responsibly. Made by William &amp; Marco.
+        Gobble responsibly. Made by William &amp; Marko.
       </footer>
 
       <GuestSheet id={editing} onClose={() => setEditing(null)} />
@@ -165,8 +165,8 @@ function TopBar() {
             {firstName(me.name)}
           </button>
         ) : (
-          <a href="#rsvp" className="rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-sky transition hover:bg-sky-soft">
-            RSVP
+          <a href="#list" className="rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-sky transition hover:bg-sky-soft">
+            The list
           </a>
         )}
       </div>

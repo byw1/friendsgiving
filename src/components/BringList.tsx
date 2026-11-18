@@ -73,7 +73,7 @@ export function BringList() {
 
   return (
     <section id="list" className="scroll-mt-20">
-      <Heading sub="Tap anything you can bring. Change your mind any time.">What we need</Heading>
+      <Heading sub="Hit + on anything you can bring. Change your mind any time.">What we need</Heading>
 
       <Progress covered={covered} total={total} />
 
@@ -142,7 +142,7 @@ function Progress({ covered, total }: { covered: number; total: number }) {
 }
 
 function ItemTile({ item }: { item: Item }) {
-  const { me, api, asSomeone, editGuest } = useApp();
+  const { me, api, asSomeone, editGuest, celebrate } = useApp();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [Icon, color] = ICONS[item.slug ?? ""] ?? fallbackIcon;
@@ -159,12 +159,15 @@ function ItemTile({ item }: { item: Item }) {
       return;
     }
     asSomeone({
-      title: `Who's bringing ${item.label.toLowerCase()}?`,
+      title: "What's your name?",
       run: async (guestId) => {
         setBusy(true);
         const r = await api("/api/claims", { body: { guestId, itemId: item.id } });
         setBusy(false);
-        if (r.state) toast(`Nice! You're on ${item.label.toLowerCase()}.`);
+        if (r.state) {
+          celebrate("happy");
+          toast(`Nice! You're on ${item.label.toLowerCase()}.`);
+        }
       },
     });
   };
@@ -250,7 +253,7 @@ function SomethingElse() {
     const v = label.trim();
     if (!v) return;
     asSomeone({
-      title: `Who's bringing ${v}?`,
+      title: "What's your name?",
       run: async (guestId) => {
         setBusy(true);
         const r = await api("/api/claims", { body: { guestId, label: v } });

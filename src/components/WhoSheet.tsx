@@ -9,7 +9,7 @@ export type WhoRequest = { title: string; run: (guestId: number) => void | Promi
 
 /** "Who are you?" Pick yourself from the list or add your name. No passwords, no emails. */
 export function WhoSheet({ request, onClose }: { request: WhoRequest | null; onClose: () => void }) {
-  const { state, api, setMeId, celebrate } = useApp();
+  const { state, api, setMeId } = useApp();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -30,7 +30,6 @@ export function WhoSheet({ request, onClose }: { request: WhoRequest | null; onC
     const r = await api("/api/guests", { body: { name, status: "going" } });
     setBusy(false);
     if (r.id) {
-      if (!r.existed) celebrate("happy");
       await pick(r.id);
     }
   };
@@ -41,7 +40,7 @@ export function WhoSheet({ request, onClose }: { request: WhoRequest | null; onC
     <Sheet open={!!request} onClose={onClose} title={request?.title ?? "Who are you?"}>
       {people.length > 0 && (
         <>
-          <p className="mb-3 text-[15px] font-bold text-mute">Tap your name</p>
+          <p className="mb-3 text-[15px] font-bold text-mute">Tap your name if you've picked something before</p>
           <div className="mb-6 flex flex-wrap gap-2">
             {people.map((g, i) => (
               <motion.button
@@ -60,10 +59,10 @@ export function WhoSheet({ request, onClose }: { request: WhoRequest | null; onC
         </>
       )}
       <form onSubmit={add} className="space-y-3">
-        <p className="text-[15px] font-bold text-mute">{people.length ? "Not on the list yet?" : "What's your name?"}</p>
+        <p className="text-[15px] font-bold text-mute">{people.length ? "First time here?" : "So everyone knows who's bringing it"}</p>
         <TextInput id="who-name" autoFocus={!people.length} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoComplete="name" />
         <Btn tone="leaf" className="w-full" loading={busy} disabled={!name.trim()}>
-          Add me &amp; continue
+          Add my name
         </Btn>
       </form>
     </Sheet>

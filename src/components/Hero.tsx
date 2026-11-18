@@ -18,14 +18,13 @@ const LINES = [
 export function Hero({ partifulUrl }: { partifulUrl: string }) {
   const { state, me, mood } = useApp();
   const [line, setLine] = useState(0);
-  const going = state.guests.filter((g) => g.status === "going");
-  const headcount = going.reduce((n, g) => n + 1 + g.plusOnes, 0);
+  const bringers = state.guests.filter((g) => g.status !== "cant" && g.claims.length > 0).length;
 
   const speech =
     mood === "happy"
-      ? "Yesss! See you there!"
+      ? "Yesss! Thank you!"
       : mood === "sad"
-        ? "Aww. We'll save you a plate."
+        ? "Aww, okay. Someone else will grab it."
         : me && line === 0
           ? `Hey ${firstName(me.name)}! Saturday's gonna be good.`
           : LINES[line];
@@ -89,9 +88,9 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
         <Btn
           tone="pumpkin"
           className="w-full"
-          onClick={() => document.getElementById(me ? "list" : "rsvp")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          onClick={() => document.getElementById("list")?.scrollIntoView({ behavior: "smooth", block: "start" })}
         >
-          {me ? "Pick what to bring" : "I'm coming!"}
+          Pick what to bring
         </Btn>
         {partifulUrl && (
           <a
@@ -105,9 +104,9 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
         )}
       </motion.div>
 
-      {headcount > 0 && (
+      {bringers > 0 && (
         <p className="mt-5 text-[15px] font-bold text-mute">
-          <span className="font-black text-leaf-dark">{headcount}</span> {headcount === 1 ? "person is" : "people are"} coming so far
+          <span className="font-black text-leaf-dark">{bringers}</span> {bringers === 1 ? "person has" : "people have"} picked something so far
         </p>
       )}
     </section>

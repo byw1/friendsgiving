@@ -21,7 +21,7 @@ export type Host = {
 
 export const HOSTS: Host[] = [
   { name: "William", role: "Host", plan: "" },
-  { name: "Marco", role: "Host", plan: "" },
+  { name: "Marko", role: "Host", plan: "" },
 ];
 
 export type SeedItem = {

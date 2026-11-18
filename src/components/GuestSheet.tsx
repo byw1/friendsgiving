@@ -3,14 +3,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
-import type { Status } from "@/lib/types";
 import { useApp } from "./App";
-import { Avatar, Btn, Sheet, Stepper, StatusPicker, TextInput, bouncy, firstName, useToast } from "./ui";
+import { Avatar, Btn, Sheet, TextInput, bouncy, firstName, useToast } from "./ui";
 import { claimLabel } from "./BringList";
 
 /** Edit anyone. We trust our friends. */
 export function GuestSheet({ id, onClose }: { id: number | null; onClose: () => void }) {
-  const { state, api, me, setMeId, celebrate } = useApp();
+  const { state, api, me, setMeId } = useApp();
   const toast = useToast();
   const guest = state.guests.find((g) => g.id === id) ?? null;
   const [name, setName] = useState("");
@@ -33,7 +32,7 @@ export function GuestSheet({ id, onClose }: { id: number | null; onClose: () => 
   const isMe = me?.id === guest.id;
   const first = firstName(guest.name);
 
-  const patch = (body: { name?: string; status?: Status; plusOnes?: number }) => api(`/api/guests/${guest.id}`, { method: "PATCH", body });
+  const patch = (body: { name?: string }) => api(`/api/guests/${guest.id}`, { method: "PATCH", body });
 
   const saveName = async () => {
     if (name.trim() && name.trim() !== guest.name) {
@@ -62,21 +61,6 @@ export function GuestSheet({ id, onClose }: { id: number | null; onClose: () => 
           </label>
           <TextInput id="guest-name" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} onBlur={saveName} onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()} />
         </div>
-
-        <StatusPicker
-          value={guest.status}
-          onChange={async (s) => {
-            const r = await patch({ status: s });
-            if (r.state) celebrate(s === "going" ? "happy" : s === "cant" ? "sad" : "idle");
-          }}
-        />
-
-        {guest.status !== "cant" && (
-          <div className="flex items-center justify-between rounded-2xl bg-snow px-4 py-3">
-            <span className="text-[15px] font-extrabold">Plus-ones</span>
-            <Stepper value={guest.plusOnes} onChange={(n) => patch({ plusOnes: n })} />
-          </div>
-        )}
 
         <div>
           <p className="mb-2 text-[13px] font-extrabold uppercase tracking-wider text-faint">{isMe ? "You're bringing" : `${first} is bringing`}</p>
@@ -161,7 +145,7 @@ export function GuestSheet({ id, onClose }: { id: number | null; onClose: () => 
             }}
           >
             <Trash2 className="size-4" strokeWidth={3} />
-            {confirm ? "Tap again to remove" : "Remove from list"}
+            {confirm ? "Tap again to remove" : "Remove them and their stuff"}
           </Btn>
         </div>
       </div>
