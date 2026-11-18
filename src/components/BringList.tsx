@@ -14,6 +14,7 @@ import {
   GlassWater,
   Ham,
   Martini,
+  Pizza,
   Plus,
   Salad,
   Soup,
@@ -30,6 +31,7 @@ import { Avatar, Btn, Heading, Sheet, TextInput, bouncy, firstName, isHost, useT
 
 const ICONS: Record<string, [LucideIcon, string]> = {
   turkey: [Drumstick, "#ff9600"],
+  pizza: [Pizza, "#ff4b4b"],
   protein: [Ham, "#ff4b4b"],
   mashed: [Soup, "#ffc800"],
   mac: [Soup, "#ff9600"],

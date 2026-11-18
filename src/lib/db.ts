@@ -91,6 +91,12 @@ async function seed(client: PoolClient) {
     [slugs]
   );
   await client.query(`delete from items i where i.slug is not null and not (i.slug = any($1))`, [slugs]);
+  // Free-text extras that match a list item by name ("pizza" -> Pizza) move onto that item.
+  await client.query(
+    `update claims c set item_id = i.id, label = null from items i
+      where c.item_id is null and lower(trim(c.label)) = lower(i.label)
+        and not exists (select 1 from claims d where d.guest_id = c.guest_id and d.item_id = i.id)`
+  );
 }
 
 export async function db(): Promise<Pool> {

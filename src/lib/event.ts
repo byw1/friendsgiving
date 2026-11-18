@@ -43,6 +43,7 @@ export const CATEGORIES = [
 
 export const SEED_ITEMS: SeedItem[] = [
   { slug: "turkey", category: "mains", label: "Turkey", hint: "or any roast", need: 1 },
+  { slug: "pizza", category: "mains", label: "Pizza", need: 1 },
   { slug: "protein", category: "mains", label: "Another protein", hint: "ham, chicken, wings", need: 2 },
 
   { slug: "mashed", category: "sides", label: "Mashed potatoes", need: 1 },
