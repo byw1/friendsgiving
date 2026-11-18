@@ -7,6 +7,8 @@ export type Claim = {
   itemId: number | null;
   label: string | null;
   note: string | null;
+  // Free-text claims typed into a category ("add another side") live in that category.
+  category: string | null;
 };
 
 export type Item = {

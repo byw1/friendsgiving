@@ -106,6 +106,12 @@ export function BringList() {
                 {g.items.map((item) => (
                   <ItemTile key={item.id} item={item} />
                 ))}
+                {state.extras
+                  .filter((c) => c.category === g.key)
+                  .map((c) => (
+                    <ExtraTile key={c.id} claim={c} category={g.key} />
+                  ))}
+                <AddAnother category={g.key} />
               </div>
             </motion.div>
           ))}
@@ -229,7 +235,12 @@ function ItemTile({ item }: { item: Item }) {
                 </span>
               ))}
               {item.claims.length > 2 && ` +${item.claims.length - 2}`}
-              {item.need > 1 && <span className="text-faint"> · {Math.min(item.claims.length, item.need)}/{item.need}</span>}
+              {item.need > 1 &&
+                (full ? (
+                  <span className="text-faint"> · {item.need}/{item.need}</span>
+                ) : (
+                  <span className="font-extrabold text-sky"> · need {item.need - item.claims.length} more</span>
+                ))}
             </p>
           </div>
         )}
@@ -299,11 +310,114 @@ function OptionPicker({ item, open, onClose, onPick }: { item: Item; open: boole
   );
 }
 
+const CATEGORY_NOUN: Record<string, string> = { mains: "main", sides: "side", dessert: "dessert", drinks: "drink", supplies: "thing" };
+const CATEGORY_ICON: Record<string, [LucideIcon, string]> = {
+  mains: [Drumstick, "#ff9600"],
+  sides: [Salad, "#58cc02"],
+  dessert: [CakeSlice, "#ff9600"],
+  drinks: [Beer, "#ce82ff"],
+  supplies: [Utensils, "#777777"],
+};
+
+/** Something a guest typed into a category, shown right alongside the list items. */
+function ExtraTile({ claim, category }: { claim: Claim; category: string }) {
+  const { me, api, editGuest } = useApp();
+  const [Icon, color] = CATEGORY_ICON[category] ?? fallbackIcon;
+  const mine = me?.id === claim.guestId;
+  return (
+    <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={bouncy}
+      className={clsx("flex items-center gap-3 rounded-2xl border-2 p-3", mine ? "border-leaf bg-leaf-soft/40" : "border-line bg-paper")}
+    >
+      <span className="grid size-12 shrink-0 place-items-center rounded-xl" style={{ background: `${color}22`, color }}>
+        <Icon className="size-6" strokeWidth={2.5} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[16px] font-extrabold text-ink">{claim.label}</p>
+        <button onClick={() => editGuest(claim.guestId)} className="mt-0.5 flex max-w-full items-center gap-1.5 text-left">
+          <Avatar name={claim.guestName} id={claim.guestId} size={22} />
+          <span className="truncate text-[13px] font-bold text-mute"><Who name={claim.guestName} /></span>
+        </button>
+      </div>
+      {mine ? (
+        <motion.button
+          whileTap={{ scale: 0.88 }}
+          onClick={() => api(`/api/claims/${claim.id}`, { method: "DELETE" })}
+          aria-label={`Stop bringing ${claim.label}`}
+          className="ledge-sm grid size-11 shrink-0 place-items-center rounded-xl border-2 border-leaf-dark bg-leaf text-white [--ledge:var(--color-leaf-dark)]"
+        >
+          <Check className="size-5" strokeWidth={4} />
+        </motion.button>
+      ) : (
+        <span className="grid size-11 shrink-0 place-items-center text-leaf"><Check className="size-5" strokeWidth={4} /></span>
+      )}
+    </motion.div>
+  );
+}
+
+/** "+ Add another side": type it in and it lands in this category. */
+function AddAnother({ category }: { category: string }) {
+  const { api, asSomeone, celebrate } = useApp();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const noun = CATEGORY_NOUN[category] ?? "thing";
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = label.trim();
+    if (!v) return;
+    asSomeone({
+      title: "What's your name?",
+      run: async (guestId) => {
+        setBusy(true);
+        const r = await api("/api/claims", { body: { guestId, label: v, category } });
+        setBusy(false);
+        if (r.state) {
+          setLabel("");
+          setOpen(false);
+          celebrate("happy");
+          toast(`Ooh, ${v}. Love it.`);
+        }
+      },
+    });
+  };
+
+  if (!open)
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex min-h-[76px] items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line p-3 text-[15px] font-extrabold text-mute transition hover:border-sky hover:text-sky"
+      >
+        <Plus className="size-5" strokeWidth={3.5} />
+        Add another {noun}
+      </button>
+    );
+  return (
+    <form onSubmit={submit} className="flex items-center gap-2 rounded-2xl border-2 border-sky bg-sky-soft/50 p-3">
+      <TextInput
+        id={`add-${category}`}
+        autoFocus
+        value={label}
+        onChange={(e) => setLabel(e.target.value)}
+        onBlur={() => !label.trim() && setOpen(false)}
+        maxLength={60}
+        placeholder={`What ${noun} are you bringing?`}
+        className="!h-12 !bg-paper !text-[16px]"
+      />
+      <Btn tone="pumpkin" loading={busy} disabled={!label.trim()} className="shrink-0 !px-4" aria-label="Add">
+        <Plus className="size-5" strokeWidth={3.5} />
+      </Btn>
+    </form>
+  );
+}
+
 function SomethingElse() {
   const { state, api, asSomeone, editGuest } = useApp();
   const toast = useToast();
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
+  const loose = state.extras.filter((c) => !c.category);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -335,10 +449,10 @@ function SomethingElse() {
           <Plus className="size-5" strokeWidth={3.5} />
         </Btn>
       </form>
-      {state.extras.length > 0 && (
+      {loose.length > 0 && (
         <motion.div layout className="mt-4 flex flex-wrap gap-2">
           <AnimatePresence initial={false}>
-            {state.extras.map((c) => (
+            {loose.map((c) => (
               <motion.button
                 layout
                 key={c.id}

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getState } from "@/lib/state";
 import { body, clean, fail, json, toInt } from "@/lib/http";
+import { CATEGORIES } from "@/lib/event";
 
 export async function POST(req: Request) {
   const b = await body(req);
@@ -25,7 +26,8 @@ export async function POST(req: Request) {
   } else {
     const label = clean(b.label, 60);
     if (!label) return fail("What are you bringing?");
-    await pool.query("insert into claims (guest_id, label, note) values ($1, $2, $3)", [guestId, label, note]);
+    const category = CATEGORIES.some((c) => c.key === b.category) ? (b.category as string) : null;
+    await pool.query("insert into claims (guest_id, label, note, category) values ($1, $2, $3, $4)", [guestId, label, note, category]);
   }
   return json({ ok: true, state: await getState() });
 }

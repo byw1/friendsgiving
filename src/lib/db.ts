@@ -53,6 +53,7 @@ create index if not exists claims_guest_idx on claims(guest_id);
 create index if not exists claims_item_idx on claims(item_id);
 
 alter table guests alter column email drop not null;
+alter table claims add column if not exists category text;
 
 create table if not exists login_tokens (
   token_hash text primary key,

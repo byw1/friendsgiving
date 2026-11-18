@@ -42,12 +42,12 @@ export const CATEGORIES = [
 ] as const;
 
 export const SEED_ITEMS: SeedItem[] = [
-  { slug: "turkey", category: "mains", label: "Turkey", hint: "or any roast", need: 1 },
+  { slug: "turkey", category: "mains", label: "Turkey", hint: "or any roast", need: 2 },
   { slug: "pizza", category: "mains", label: "Pizza", need: 1 },
   { slug: "protein", category: "mains", label: "Another protein", hint: "ham, chicken, wings", need: 2 },
 
-  { slug: "mashed", category: "sides", label: "Mashed potatoes", need: 1 },
-  { slug: "mac", category: "sides", label: "Mac & cheese", need: 1 },
+  { slug: "mashed", category: "sides", label: "Mashed potatoes", need: 2 },
+  { slug: "mac", category: "sides", label: "Mac & cheese", need: 2 },
   { slug: "stuffing", category: "sides", label: "Stuffing", need: 1 },
   { slug: "veg", category: "sides", label: "Greens or veggies", hint: "green beans, salad", need: 2 },
   { slug: "rolls", category: "sides", label: "Bread & rolls", need: 1 },

@@ -7,7 +7,7 @@ export async function getState(): Promise<State> {
   const [itemsRes, claimsRes, guestsRes] = await Promise.all([
     pool.query("select id, slug, category, label, hint, need from items order by sort, id"),
     pool.query(
-      `select c.id, c.guest_id, g.name as guest_name, g.status, c.item_id, c.label, c.note
+      `select c.id, c.guest_id, g.name as guest_name, g.status, c.item_id, c.label, c.note, c.category
          from claims c join guests g on g.id = c.guest_id
         order by c.created_at, c.id`
     ),
@@ -15,7 +15,7 @@ export async function getState(): Promise<State> {
   ]);
 
   const all = claimsRes.rows.map((r) => ({
-    claim: { id: r.id, guestId: r.guest_id, guestName: r.guest_name, itemId: r.item_id, label: r.label, note: r.note } as Claim,
+    claim: { id: r.id, guestId: r.guest_id, guestName: r.guest_name, itemId: r.item_id, label: r.label, note: r.note, category: r.category } as Claim,
     out: r.status === "cant",
   }));
   // Stuff from people who can't come doesn't count toward the list.
