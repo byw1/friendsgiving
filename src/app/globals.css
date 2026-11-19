@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/* Chunky, bright, bouncy. Every button sits on a darker "ledge" and squishes down when pressed. */
+@theme {
+  --font-sans: var(--font-nunito), ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+
+  --color-paper: #ffffff;
+  --color-snow: #f7f7f7;
+  --color-line: #e5e5e5;
+  --color-ink: #3c3c3c;
+  --color-mute: #777777;
+  --color-faint: #afafaf;
+
+  --color-pumpkin: #ff9600;
+  --color-pumpkin-dark: #d97f00;
+  --color-pumpkin-soft: #fff1dc;
+  --color-leaf: #58cc02;
+  --color-leaf-dark: #58a700;
+  --color-leaf-soft: #d7ffb8;
+  --color-corn: #ffc800;
+  --color-corn-dark: #e5a800;
+  --color-corn-soft: #fff5cc;
+  --color-berry: #ff4b4b;
+  --color-berry-dark: #ea2b2b;
+  --color-berry-soft: #ffdfe0;
+  --color-sky: #1cb0f6;
+  --color-sky-dark: #1899d6;
+  --color-sky-soft: #ddf4ff;
+  --color-plum: #ce82ff;
+  --color-plum-dark: #a568cc;
+}
+
+html {
+  background: var(--color-paper);
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+::selection { background: #ffe0b0; }
+
+input, button, textarea { font: inherit; }
+
+/* The ledge: a solid shadow underneath that collapses on press */
+.ledge {
+  box-shadow: 0 4px 0 var(--ledge, #e5e5e5);
+  transform: translateY(0);
+  transition: transform 80ms ease, box-shadow 80ms ease, background-color 150ms, border-color 150ms, color 150ms, filter 150ms;
+}
+.ledge:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--ledge, #e5e5e5);
+}
+.ledge-sm { box-shadow: 0 2px 0 var(--ledge, #e5e5e5); }
+.ledge-sm:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--ledge, #e5e5e5); }
+
+/* Glossy highlight strip on progress fills, like a candy bar */
+.shine { position: relative; overflow: hidden; }
+.shine::after {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; top: 3px;
+  height: 30%;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.35);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+:focus-visible { outline: 3px solid var(--color-sky); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hosts get the gold treatment */
+@keyframes host-sweep { to { background-position: -200% 0; } }
+@keyframes host-spin { to { transform: rotate(360deg); } }
+.host-shimmer {
+  background: linear-gradient(100deg, #ff9600 0%, #ffc800 30%, #fff3b0 45%, #ffc800 60%, #ff9600 100%);
+  background-size: 200% 100%;
+  animation: host-sweep 2.4s linear infinite;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.15);
+}
+.host-text {
+  background: linear-gradient(100deg, #e07a00 0%, #ffb300 35%, #ffe17a 50%, #ffb300 65%, #e07a00 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: host-sweep 2.4s linear infinite;
+}
+.host-ring { isolation: isolate; }
+.host-ring::before {
+  content: ""; position: absolute; inset: 0; border-radius: 999px; z-index: -1;
+  background: conic-gradient(#ffc800, #ff9600, #fff3b0, #ffc800, #ff9600, #ffc800);
+  animation: host-spin 3s linear infinite;
+}
+.host-card { position: relative; }
+.host-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 230 140 / 0.45) 50%, transparent 65%);
+  background-size: 250% 100%;
+  animation: host-sweep 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .host-shimmer, .host-text, .host-ring::before, .host-card::after { animation: none; }
+}
+
+/* Never let one long row widen the page on phones */
+html, body { max-width: 100%; overflow-x: clip; }
