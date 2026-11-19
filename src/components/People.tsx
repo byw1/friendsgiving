@@ -23,7 +23,7 @@ export function People() {
           Nobody's picked anything yet. Be the first!
         </p>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-2 sm:grid-cols-[repeat(2,minmax(0,1fr))]">
           {people.map((g, i) => {
             const host = isHost(g.name);
             return (
@@ -34,7 +34,7 @@ export function People() {
               transition={{ ...bouncy, delay: Math.min(i * 0.03, 0.3) }}
               onClick={() => editGuest(g.id)}
               className={clsx(
-                "ledge-sm flex items-center gap-3 rounded-2xl border-2 p-3 text-left",
+                "ledge-sm flex min-w-0 items-center gap-3 rounded-2xl border-2 p-3 text-left",
                 host
                   ? "host-card mt-2 border-corn bg-corn-soft [--ledge:var(--color-corn-dark)] sm:col-span-2"
                   : me?.id === g.id
@@ -49,7 +49,7 @@ export function People() {
                   {host && <HostBadge />}
                   {me?.id === g.id && <span className="shrink-0 text-[12px] font-black uppercase text-pumpkin">you</span>}
                 </p>
-                <p className={clsx("truncate text-[13px] font-bold", host ? "text-ink" : "text-mute")}>
+                <p className={clsx("text-[13px] font-bold", host ? "line-clamp-3 text-ink" : "truncate text-mute")}>
                   {g.claims.length ? g.claims.map((c) => claimLabel(c, state.items)).join(", ") : "Hosting! Plans coming soon."}
                 </p>
               </div>

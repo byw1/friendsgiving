@@ -102,7 +102,7 @@ export function BringList() {
           {groups.map((g) => (
             <motion.div key={g.key} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
               {filter === "all" && <p className="mb-2 ml-1 text-[13px] font-extrabold uppercase tracking-wider text-faint">{g.label}</p>}
-              <div className="grid gap-2.5 sm:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-[repeat(2,minmax(0,1fr))]">
                 {g.items.map((item) => (
                   <ItemTile key={item.id} item={item} />
                 ))}
@@ -189,7 +189,7 @@ function ItemTile({ item }: { item: Item }) {
     <motion.div
       layout
       className={clsx(
-        "flex items-center gap-3 rounded-2xl border-2 p-3 transition-colors",
+        "flex min-w-0 items-center gap-3 rounded-2xl border-2 p-3 transition-colors",
         mine ? "border-leaf bg-leaf-soft/40" : full ? "border-line bg-snow" : "border-line bg-paper"
       )}
     >
@@ -326,7 +326,7 @@ function ExtraTile({ claim, category }: { claim: Claim; category: string }) {
   const mine = me?.id === claim.guestId;
   return (
     <motion.div layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={bouncy}
-      className={clsx("flex items-center gap-3 rounded-2xl border-2 p-3", mine ? "border-leaf bg-leaf-soft/40" : "border-line bg-paper")}
+      className={clsx("flex min-w-0 items-center gap-3 rounded-2xl border-2 p-3", mine ? "border-leaf bg-leaf-soft/40" : "border-line bg-paper")}
     >
       <span className="grid size-12 shrink-0 place-items-center rounded-xl" style={{ background: `${color}22`, color }}>
         <Icon className="size-6" strokeWidth={2.5} />

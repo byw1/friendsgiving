@@ -117,3 +117,6 @@ input, button, textarea { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .host-shimmer, .host-text, .host-ring::before, .host-card::after { animation: none; }
 }
+
+/* Never let one long row widen the page on phones */
+html, body { max-width: 100%; overflow-x: clip; }

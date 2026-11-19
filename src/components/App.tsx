@@ -160,16 +160,16 @@ function TopBar({ partifulUrl }: { partifulUrl: string }) {
   return (
     <header className="sticky top-0 z-40 border-b-2 border-line bg-paper/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[1040px] items-center justify-between px-4 sm:px-6">
-        <a href="#" className="text-[19px] font-black tracking-tight text-pumpkin">
+        <a href="#" className="shrink-0 text-[19px] font-black tracking-tight text-pumpkin">
           friendsgiving
         </a>
-        <div className="flex items-center gap-1">
+        <div className="flex min-w-0 items-center gap-0.5">
         {partifulUrl && (
           <a
             href={partifulUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-plum transition hover:bg-snow"
+            className="inline-flex shrink-0 items-center gap-1 rounded-xl px-2 py-2 text-[13px] font-extrabold uppercase tracking-wide text-plum transition hover:bg-snow"
           >
             Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
           </a>
@@ -177,13 +177,13 @@ function TopBar({ partifulUrl }: { partifulUrl: string }) {
         {me ? (
           <button
             onClick={() => editGuest(me.id)}
-            className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[14px] font-extrabold text-ink transition hover:bg-snow"
+            className="flex min-w-0 items-center gap-2 rounded-full p-1 text-[14px] font-extrabold text-ink transition hover:bg-snow min-[380px]:pr-3"
           >
             <Avatar name={me.name} id={me.id} size={30} />
-            {firstName(me.name)}
+            <span className="hidden max-w-[110px] truncate min-[380px]:inline">{firstName(me.name)}</span>
           </button>
         ) : (
-          <a href="#list" className="rounded-xl px-3 py-2 text-[13px] font-extrabold uppercase tracking-wide text-sky transition hover:bg-sky-soft">
+          <a href="#list" className="shrink-0 rounded-xl px-2 py-2 text-[13px] font-extrabold uppercase tracking-wide text-sky transition hover:bg-sky-soft">
             The list
           </a>
         )}
