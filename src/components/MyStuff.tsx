@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, X } from "lucide-react";
+import { EVENT } from "@/lib/event";
 import { useApp } from "./App";
 import { Avatar, Btn, Card, bouncy, firstName } from "./ui";
 import { claimLabel } from "./BringList";
@@ -67,7 +68,7 @@ export function MyStuff({ partifulUrl }: { partifulUrl: string }) {
             <Card className="border-sky bg-sky-soft p-5">
               <h2 className="text-[20px] font-black leading-tight text-sky-dark">How this works</h2>
               <ol className="mt-3 space-y-2.5 text-[15px] font-bold text-ink">
-                <Step n={1}>RSVP on Partiful like normal.</Step>
+                <Step n={1}>RSVP on {EVENT.rsvpName} like normal.</Step>
                 <Step n={2}>Hit + on something below and add your name.</Step>
                 <Step n={3}>Changed your mind? Tap it again. No big deal.</Step>
               </ol>
@@ -78,7 +79,7 @@ export function MyStuff({ partifulUrl }: { partifulUrl: string }) {
                   rel="noreferrer"
                   className="ledge mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-sky px-4 text-[13px] font-extrabold uppercase tracking-wide text-white [--ledge:var(--color-sky-dark)]"
                 >
-                  RSVP on Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
+                  RSVP on {EVENT.rsvpName} <ArrowUpRight className="size-4" strokeWidth={3} />
                 </a>
               )}
             </Card>

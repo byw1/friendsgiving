@@ -8,8 +8,10 @@ import { useApp } from "./App";
 import { Turkey } from "./Turkey";
 import { Btn, bouncy, firstName } from "./ui";
 
+const DAY = EVENT.dateLabel.split(",")[0]; // "Saturday"
+
 const LINES = [
-  "Gobble gobble! Friendsgiving is Saturday.",
+  `Gobble gobble! ${EVENT.title} is ${DAY}.`,
   "Bring a dish. Or cups. Cups count.",
   "Please don't let us end up with 9 pies.",
   "I'm the guest of honor. Allegedly.",
@@ -26,7 +28,7 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
       : mood === "sad"
         ? "Aww, okay. Someone else will grab it."
         : me && line === 0
-          ? `Hey ${firstName(me.name)}! Saturday's gonna be good.`
+          ? `Hey ${firstName(me.name)}! ${DAY}'s gonna be good.`
           : LINES[line];
 
   return (
@@ -54,8 +56,8 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
         transition={{ ...bouncy, delay: 0.1 }}
         className="text-[44px] font-black leading-[1] tracking-tight text-ink sm:text-[64px]"
       >
-        Friendsgiving
-        <span className="mt-1 block text-[24px] text-pumpkin sm:text-[32px]">at The Penthouse</span>
+        {EVENT.title}
+        <span className="mt-1 block text-[24px] text-pumpkin sm:text-[32px]">at {EVENT.place}</span>
       </motion.h1>
 
       <motion.div
@@ -65,7 +67,7 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
         className="mt-6 flex flex-wrap justify-center gap-2"
       >
         <Chip icon={<CalendarDays className="size-4" strokeWidth={2.75} />} tone="bg-sky-soft text-sky-dark">
-          Sat, Nov 21
+          {EVENT.shortDateLabel}
         </Chip>
         <Chip icon={<Clock className="size-4" strokeWidth={2.75} />} tone="bg-pumpkin-soft text-pumpkin-dark">
           {EVENT.timeLabel}
@@ -99,7 +101,7 @@ export function Hero({ partifulUrl }: { partifulUrl: string }) {
             rel="noreferrer"
             className="ledge inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-line bg-paper px-6 text-[15px] font-extrabold uppercase tracking-wide text-ink hover:bg-snow"
           >
-            Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
+            {EVENT.rsvpName} <ArrowUpRight className="size-4" strokeWidth={3} />
           </a>
         )}
       </motion.div>

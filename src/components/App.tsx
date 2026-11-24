@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { Guest, State } from "@/lib/types";
 import { ArrowUpRight } from "lucide-react";
+import { EVENT, HOSTS } from "@/lib/event";
 import { Avatar, ConfettiBurst, ToastProvider, firstName, useToast } from "./ui";
 import type { Mood } from "./Turkey";
 import { Hero } from "./Hero";
@@ -137,12 +138,12 @@ function Inner({ initial, partifulUrl }: { initial: State; partifulUrl: string }
         </div>
       </main>
       <footer className="border-t-2 border-line py-8 text-center text-[14px] font-bold text-faint">
-        Gobble responsibly. Made by William &amp; Marko.
+        Gobble responsibly. Made by {HOSTS.map((h) => h.name).join(" & ")}.
         {partifulUrl && (
           <>
             {" "}
             <a href={partifulUrl} target="_blank" rel="noreferrer" className="text-plum underline-offset-2 hover:underline">
-              Back to Partiful
+              Back to {EVENT.rsvpName}
             </a>
           </>
         )}
@@ -171,7 +172,7 @@ function TopBar({ partifulUrl }: { partifulUrl: string }) {
             rel="noreferrer"
             className="inline-flex shrink-0 items-center gap-1 rounded-xl px-2 py-2 text-[13px] font-extrabold uppercase tracking-wide text-plum transition hover:bg-snow"
           >
-            Partiful <ArrowUpRight className="size-4" strokeWidth={3} />
+            {EVENT.rsvpName} <ArrowUpRight className="size-4" strokeWidth={3} />
           </a>
         )}
         {me ? (

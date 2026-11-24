@@ -5,5 +5,5 @@ import { EVENT } from "@/lib/event";
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  return <App initial={await getState()} partifulUrl={EVENT.partifulUrl} />;
+  return <App initial={await getState()} partifulUrl={EVENT.rsvpUrl} />;
 }
