@@ -7,7 +7,14 @@
 No accounts. No spreadsheets. No group-chat chaos where four people bring mac & cheese.
 Guests tap **+**, type their name, done. Gobbles the turkey handles the rest.
 
-<img src="docs/images/hero.png" alt="The Friendsgiving homepage with Gobbles the turkey, the party date chips and a countdown" width="760">
+<table>
+  <tr>
+    <td><img src="docs/images/demo.gif" alt="Demo: tapping the turkey, claiming pizza by typing a name, then picking vodka from the drinks picker" width="300"></td>
+    <td><img src="docs/images/hero.png" alt="The Friendsgiving homepage with Gobbles the turkey, the party date chips and a countdown" width="520"></td>
+  </tr>
+</table>
+
+<sub>Tap +, type your name, done. Drinks ask "which one?" so nobody doubles up.</sub>
 
 </div>
 
@@ -124,7 +131,7 @@ Paste it in the group chat. Watch the list fill up. Gobble responsibly.
 - **Link preview image.** When you text the link, iMessage/Slack/WhatsApp show `public/og.jpg` (and `public/og.mp4` as an animated preview where supported). Swap in your own 1080×1350 image. Previews are cached hard, so add `?v=2` to the link to force a refresh.
 - **Flyer.** `flyer/flyer-fun.html` and `flyer/flyer.html` are animated poster pages. Open one in a browser, edit the text, and screen-record it for your Instagram story.
 
-  <img src="docs/images/flyer.jpg" alt="The animated party flyer with a neon sign and a 3D turkey" width="260">
+  <img src="docs/images/flyer.gif" alt="The animated party flyer with a neon sign and a 3D turkey" width="260">
 
 - **Colors and fonts** live in `src/app/globals.css`. The look is chunky buttons, Nunito, and lots of bright color.
 - **Gobbles's lines** (the speech bubble) are in `src/components/Hero.tsx`.
