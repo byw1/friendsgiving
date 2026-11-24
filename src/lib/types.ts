@@ -1,0 +1,37 @@
+export type Status = "going" | "maybe" | "cant";
+
+export type Claim = {
+  id: number;
+  guestId: number;
+  guestName: string;
+  itemId: number | null;
+  label: string | null;
+  note: string | null;
+  // Free-text claims typed into a category ("add another side") live in that category.
+  category: string | null;
+};
+
+export type Item = {
+  id: number;
+  slug: string | null;
+  category: string;
+  label: string;
+  hint: string | null;
+  need: number;
+  options?: string[];
+  claims: Claim[];
+};
+
+export type Guest = {
+  id: number;
+  name: string;
+  status: Status;
+  plusOnes: number;
+  claims: Claim[];
+};
+
+export type State = {
+  items: Item[];
+  extras: Claim[];
+  guests: Guest[];
+};
