@@ -6,9 +6,14 @@ export const EVENT = {
   startsAt: "2026-11-22T02:00:00.000Z",
   timeZone: "America/Los_Angeles",
   dateLabel: "Saturday, November 21",
+  // The short version shown on the date chip and in link previews.
+  shortDateLabel: "Sat, Nov 21",
   timeLabel: "6:00 PM",
   place: "The Penthouse",
-  partifulUrl: process.env.PARTIFUL_URL || "",
+  // Where guests RSVP. The link comes from the RSVP_URL env var
+  // (PARTIFUL_URL still works); rsvpName is what the buttons say.
+  rsvpName: "Partiful",
+  rsvpUrl: process.env.RSVP_URL || process.env.PARTIFUL_URL || "",
 };
 
 export type Host = {

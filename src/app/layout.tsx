@@ -4,9 +4,14 @@ import "./globals.css";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["600", "700", "800", "900"], variable: "--font-nunito" });
 
-const SITE = process.env.APP_URL || "https://web-production-900ae187.up.railway.app";
-const TITLE = "Friendsgiving at The Penthouse";
-const DESC = "Sat, Nov 21 at 6 PM. Tap in and grab something to bring.";
+import { EVENT } from "@/lib/event";
+
+// Used for absolute link-preview URLs. Railway sets RAILWAY_PUBLIC_DOMAIN for you.
+const SITE =
+  process.env.APP_URL ||
+  (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : "http://localhost:3000");
+const TITLE = `${EVENT.title} at ${EVENT.place}`;
+const DESC = `${EVENT.shortDateLabel} at ${EVENT.timeLabel.replace(":00", "")}. Tap in and grab something to bring.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -15,10 +20,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "Friendsgiving",
+    siteName: EVENT.title,
     title: TITLE,
     description: DESC,
-    images: [{ url: "/og.jpg", width: 1080, height: 1350, type: "image/jpeg", alt: "Friendsgiving at The Penthouse" }],
+    images: [{ url: "/og.jpg", width: 1080, height: 1350, type: "image/jpeg", alt: TITLE }],
     videos: [{ url: `${SITE}/og.mp4`, secureUrl: `${SITE}/og.mp4`, width: 720, height: 900, type: "video/mp4" }],
   },
   twitter: { card: "summary_large_image", title: TITLE, description: DESC, images: ["/og.jpg"] },
