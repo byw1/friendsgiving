@@ -18,9 +18,8 @@ export const EVENT = {
 
 export type Host = {
   name: string;
-  role: string;
-  // Leave empty until the plan is locked in.
-  plan: string;
+  role?: string;
+  plan?: string;
 };
 
 export const HOSTS: Host[] = [

@@ -1,196 +1,103 @@
-<div align="center">
+<p align="center">
+  <img src="docs/images/banner.gif" alt="friendsgiving: who's bringing what? A phone shows a guest claiming pizza and picking vodka" width="100%">
+</p>
 
-# 🦃 Friendsgiving
+<p align="center">
+  <a href="#-throw-your-own-in-10-minutes"><img alt="Deploy in 10 min" src="https://img.shields.io/badge/deploy-10_min-ff9600?style=for-the-badge"></a>
+  <img alt="No logins" src="https://img.shields.io/badge/logins-none-58cc02?style=for-the-badge">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=nextdotjs&logoColor=white">
+  <img alt="Postgres" src="https://img.shields.io/badge/Postgres-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
+  <img alt="Railway" src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white">
+</p>
 
-**A cheerful little "who's bringing what" site for your potluck.**
+<p align="center">
+  <b>The end of four people bringing mac & cheese.</b><br>
+  Send one link. Friends tap <b>+</b> on what they'll bring. Everyone sees the list.
+</p>
 
-No accounts. No spreadsheets. No group-chat chaos where four people bring mac & cheese.
-Guests tap **+**, type their name, done. Gobbles the turkey handles the rest.
+<br>
 
-<table>
-  <tr>
-    <td><img src="docs/images/demo.gif" alt="Demo: tapping the turkey, claiming pizza by typing a name, then picking vodka from the drinks picker" width="300"></td>
-    <td><img src="docs/images/hero.png" alt="The Friendsgiving homepage with Gobbles the turkey, the party date chips and a countdown" width="520"></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/images/how-it-works.jpg" alt="Four phones: the bring list, adding your name, picking which drink, and the who's-bringing-what list" width="100%">
+</p>
 
-<sub>Tap +, type your name, done. Drinks ask "which one?" so nobody doubles up.</sub>
-
-</div>
-
----
-
-## What it does
-
-- **A bring list with goals.** Each item says how many you need ("Turkey ×2"), so the site nudges people with "need 1 more" until it's covered. A progress bar fills up as the list does.
-- **Zero sign-up.** Guests pick or type their name. Their browser remembers them for next time.
-- **Anyone can edit anything.** It's a party among friends, not a bank. Someone forgot to add their pie? Tap their name and fix it.
-- **"Which one?" pickers.** For drinks (or anything with options), guests choose *what* they're bringing, and options someone already grabbed are marked so you don't end up with eleven bottles of wine.
-- **"Add another" in every category,** plus a "Bringing something else?" box for the speaker, the board games, grandma's lumpia.
-- **Hosts get a gold crown.** Any guest whose name is made of host names ("Sam", "Sam & Alex") gets a shiny HOST badge and sits at the top of the list.
-- **A countdown, confetti, and a turkey that talks.** Obviously.
-- **Built for phones.** That's where everyone's going to open the link.
-
-RSVPs aren't handled here on purpose. Keep using Partiful, Luma, Evite, or a group chat for that, and drop the link in so the site points people to it.
+## ✨ What's inside
 
 <table>
   <tr>
-    <td width="58%"><img src="docs/images/bring-list.png" alt="The bring list with categories, a progress bar and plus buttons"></td>
-    <td width="42%"><img src="docs/images/mobile.png" alt="The bring list on an iPhone"></td>
+    <td width="33%" align="center"><h3>🙅</h3><b>No sign-up</b><br><sub>Guests type their name once. Their phone remembers them.</sub></td>
+    <td width="33%" align="center"><h3>🎯</h3><b>Goals per item</b><br><sub>“Turkey ×2” shows <i>need 1 more</i> until it’s covered.</sub></td>
+    <td width="33%" align="center"><h3>🍷</h3><b>“Which one?” pickers</b><br><sub>Drinks ask what kind and mark what’s taken.</sub></td>
   </tr>
   <tr>
-    <td><img src="docs/images/drinks-picker.png" alt="The 'What alcohol are you bringing?' picker"></td>
-    <td><img src="docs/images/whos-bringing.png" alt="Who's bringing what, with the hosts on top in gold"></td>
+    <td width="33%" align="center"><h3>✏️</h3><b>Anyone can edit</b><br><sub>It’s for friends. Fix a pick with one tap.</sub></td>
+    <td width="33%" align="center"><h3>👑</h3><b>Host badges</b><br><sub>Hosts get a gold crown and sit up top.</sub></td>
+    <td width="33%" align="center"><h3>🦃</h3><b>Gobbles</b><br><sub>A talking turkey, a countdown and confetti.</sub></td>
   </tr>
 </table>
 
----
+RSVPs stay where they already work (Partiful, Luma, Evite). Add your link and the buttons point there.
 
-## 🚀 Throw your own in ~10 minutes
+## 🚀 Throw your own in 10 minutes
 
-You need a free [GitHub](https://github.com) account and a [Railway](https://railway.com) account. Railway runs the site and its database for a few cents a month (the trial credit easily covers a party).
+**1. Fork this repo.**
 
-### 1. Fork it
-
-Hit **Fork** at the top of this page. You now have your own copy to customize.
-
-### 2. Make it your party
-
-Open **`src/lib/event.ts`** in your fork (you can edit right on GitHub with the ✏️ button). Everything about the party lives in this one file:
+**2. Edit [`src/lib/event.ts`](src/lib/event.ts).** It's the only file you need to touch:
 
 ```ts
 export const EVENT = {
-  title: "Friendsgiving",                 // the big headline
-  startsAt: "2026-11-22T02:00:00.000Z",   // party start in UTC, drives the countdown
-  timeZone: "America/Los_Angeles",
+  title: "Friendsgiving",
+  startsAt: "2026-11-22T02:00:00.000Z",  // in UTC, drives the countdown
   dateLabel: "Saturday, November 21",
-  shortDateLabel: "Sat, Nov 21",          // the date chip + link previews
+  shortDateLabel: "Sat, Nov 21",
   timeLabel: "6:00 PM",
-  place: "The Penthouse",                 // shown as "Friendsgiving at The Penthouse"
-  rsvpName: "Partiful",                   // what the RSVP buttons say
-  rsvpUrl: process.env.RSVP_URL || ...,   // set with an env var, see below
+  place: "The Penthouse",                // a nickname beats a street address
+  rsvpName: "Partiful",
 };
 
-export const HOSTS = [
-  { name: "William", role: "Host", plan: "" },   // 👈 swap in your names
-  { name: "Marko",   role: "Host", plan: "" },
+export const HOSTS = [{ name: "Sam" }, { name: "Alex" }];
+
+export const SEED_ITEMS = [
+  { slug: "turkey", category: "mains", label: "Turkey", need: 2 },
+  { slug: "alcohol", category: "drinks", label: "Alcohol", need: 6,
+    options: ["Wine", "Beer", "Tequila"] },  // options = "which one?" picker
+  // ...
 ];
 ```
 
-> 💡 **Getting `startsAt` right:** it's in UTC. 6 PM Pacific on Nov 21 is `2026-11-22T02:00:00.000Z`. Not sure? Ask any search engine "6pm PST in UTC".
+**3. Deploy on [Railway](https://railway.com).**
+New Project → *Deploy from GitHub repo* → pick your fork. Then **+ Create → Database → PostgreSQL**, and on the web service add:
 
-> 🔒 **Privacy tip:** `place` is shown to anyone with the link, so a fun nickname ("The Penthouse", "Casa Jordan") is nicer than a street address. Put the real address in your RSVP invite.
-
-### 3. Pick what people should bring
-
-Further down in the same file is `SEED_ITEMS`. Add, remove, or rename anything:
-
-```ts
-{ slug: "pie", category: "dessert", label: "Pie", hint: "pumpkin, apple, pecan", need: 2 },
-
-// Add `options` to get a "which one?" picker:
-{ slug: "chasers", category: "drinks", label: "Chasers & mixers", need: 2,
-  options: ["Coke", "Sprite", "Ginger beer", "Tonic"] },
-```
-
-| Field | What it does |
+| Variable | Value |
 | --- | --- |
-| `slug` | A unique id. **Don't change it after guests start signing up**, or their pick moves to "something else". |
-| `category` | One of the keys in `CATEGORIES` (`mains`, `sides`, `dessert`, `drinks`, `supplies`). Add your own there too. |
-| `label` | What guests see. |
-| `hint` | Optional little grey helper text. |
-| `need` | How many of this you want. The list shows "need N more" until it's full. |
-| `options` | Optional list of choices for the "which one?" picker. |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+| `RSVP_URL` | *optional* your Partiful / Luma link |
+| `APP_URL` | *optional* only for a custom domain |
 
-The list syncs to the database every time the site starts, so editing it later is safe: change the file, push, and Railway redeploys. Removing an item doesn't lose anyone's sign-up; it moves to their "something else".
+**4. Settings → Networking → Generate Domain.** Send it to the group chat. 🎉
 
-### 4. Deploy on Railway
+Tables create themselves on first boot. Edit the list any time and redeploy: nobody's picks get lost.
 
-1. In Railway, click **New Project → Deploy from GitHub repo** and pick your fork.
-2. In the same project, click **+ Create → Database → PostgreSQL**.
-3. Open your web service → **Variables** and add:
+## 🎨 Make it yours
 
-   | Variable | Value |
-   | --- | --- |
-   | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (Railway fills this in for you) |
-   | `RSVP_URL` | *Optional.* Your Partiful / Luma / Evite link. Leave it out to hide the RSVP buttons. |
-   | `APP_URL` | *Optional.* Only if you add a custom domain, e.g. `https://turkey.example.com`. Used for link previews. |
+<img align="right" src="docs/images/flyer.gif" alt="Animated party flyer" width="200">
 
-4. Go to **Settings → Networking → Generate Domain**. That's your link. 🎉
+- **Text preview image:** swap `public/og.jpg` (1080×1350) and `public/og.mp4`.
+- **Party flyer:** open `flyer/flyer-fun.html` in a browser, change the text, screen-record it for your story.
+- **Colors:** `src/app/globals.css`.
+- **Gobbles's lines:** top of `src/components/Hero.tsx`.
+- **Not Thanksgiving?** Change the title and categories. Birthday picnic, game night, camping trip. The turkey can stay.
 
-No database setup needed: the tables create themselves on first boot.
+<br clear="right">
 
-### 5. Share the link
-
-Paste it in the group chat. Watch the list fill up. Gobble responsibly.
-
----
-
-## 🎨 Make it extra yours
-
-- **Link preview image.** When you text the link, iMessage/Slack/WhatsApp show `public/og.jpg` (and `public/og.mp4` as an animated preview where supported). Swap in your own 1080×1350 image. Previews are cached hard, so add `?v=2` to the link to force a refresh.
-- **Flyer.** `flyer/flyer-fun.html` and `flyer/flyer.html` are animated poster pages. Open one in a browser, edit the text, and screen-record it for your Instagram story.
-
-  <img src="docs/images/flyer.gif" alt="The animated party flyer with a neon sign and a 3D turkey" width="260">
-
-- **Colors and fonts** live in `src/app/globals.css`. The look is chunky buttons, Nunito, and lots of bright color.
-- **Gobbles's lines** (the speech bubble) are in `src/components/Hero.tsx`.
-- **Not a Friendsgiving?** Change `title`, swap the categories, and it's a birthday picnic, a game night, or a camping trip packing list. The turkey can stay. We insist.
-
----
-
-## 💻 Run it on your computer
-
-You'll need [Node.js 20+](https://nodejs.org) and a Postgres database (local, Docker, or a free one from Railway/Neon/Supabase).
+## 💻 Run it locally
 
 ```bash
-git clone https://github.com/<you>/friendsgiving.git
-cd friendsgiving
-npm install
-cp .env.example .env.local     # then set DATABASE_URL
-npm run dev
+docker run -d -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=fg -p 5432:5432 postgres:16
+cp .env.example .env.local   # DATABASE_URL is already set for the line above
+npm install && npm run dev   # → http://localhost:3000
 ```
 
-Open http://localhost:3000.
+Built with Next.js, Tailwind, Motion and plain Postgres.
 
-Quickest Postgres with Docker:
-
-```bash
-docker run -d --name fg-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=fg -p 5432:5432 postgres:16
-# DATABASE_URL=postgres://postgres:postgres@localhost:5432/fg
-```
-
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Local dev server with hot reload |
-| `npm run build` | Production build |
-| `npm start` | Serve the build (uses `$PORT`, defaults to 3000) |
-| `npm run lint` | Type-check |
-
-### How it's built
-
-[Next.js](https://nextjs.org) + React, [Tailwind CSS](https://tailwindcss.com), [Motion](https://motion.dev) for the bounces, [Lucide](https://lucide.dev) icons, and plain Postgres via `pg`.
-
-```
-src/lib/event.ts      ← 👈 the only file most people need to touch
-src/lib/db.ts         tables + syncing the bring list on boot
-src/app/api/          tiny JSON API for guests and claims
-src/components/       the UI (Hero, BringList, People, Turkey, ...)
-public/og.*           link preview image + video
-flyer/                animated party flyers
-```
-
----
-
-## FAQ
-
-**Can people mess with the list?** Yes, anyone with the link can edit anything. That's the point: it's for friends. Don't post the link publicly.
-
-**Can I reuse it next year?** Update the date in `event.ts`. To start with a fresh list, wipe the guests in Railway's Postgres **Data** tab (or just create a new database).
-
-**Does it do RSVPs?** Nope, on purpose. Your invite tool already does that well. This site only answers "who's bringing what?"
-
-<div align="center">
-<br>
-Made with 🥧 for Friendsgiving. Go throw a good party.
-</div>
+<p align="center"><br>Made with 🥧 for Friendsgiving. Go throw a good party.</p>
